@@ -537,7 +537,6 @@ a { color: inherit; text-decoration: none; }
 
 <script>
 // ── Config ──────────────────────────────────────────────────
-// Fill these in before deploying
 const SUPABASE_URL  = 'https://pokjjlvrtakarcnblljh.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_Tciww7ztWF4Nfqve_E_ZHg_TPlLgTlg';
 
@@ -696,8 +695,8 @@ function renderList() {
         <div class="tags">
           <span class="tag tag-${r.fulfilment_type}">${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span>
           <span class="tag tag-${statusKey(status)}">${statusLabel(status)}</span>
-          ${crises.map(c => `<span class="tag tag-crisis">${esc(shortCrisis(c))}</span>`).join('')}
-          ${r.clients?.vulnerable ? '<span class="tag tag-vuln">Vulnerable</span>' : ''}
+
+
         </div>
       </div>`;
   }).join('');
