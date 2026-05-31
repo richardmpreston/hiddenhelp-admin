@@ -801,6 +801,7 @@ function renderDetail(r) {
             <span>${esc(name)}${client.vulnerable ? ' <span class="tag tag-vuln" style="margin-left:6px">Vulnerable</span>' : ''}</span>
           </div>
           ${client.phone ? `<div class="field"><label>Phone</label><span>${esc(client.phone)}</span></div>` : ''}
+          ${client.client_secondary_contact ? `<div class="field"><label>Secondary contact</label><span>${esc(client.client_secondary_contact)}</span></div>` : ''}
           ${client.postcode ? `<div class="field"><label>Postcode</label><span>${esc(client.postcode)}</span></div>` : ''}
           ${r.can_help_lift !== null ? `<div class="field"><label>Can help lift</label><span style="color:${r.can_help_lift ? 'var(--green)' : 'var(--red)'}">${r.can_help_lift ? 'Yes' : 'No'}</span></div>` : ''}
           ${crises.length ? `<div class="field"><label>Crisis</label><span>${crises.map(esc).join(', ')}</span></div>` : ''}
