@@ -517,7 +517,8 @@ a { color: inherit; text-decoration: none; }
           <button class="pill active" data-filter="all">All</button>
           <button class="pill" data-filter="active">Active</button>
           <button class="pill" data-filter="delivery">Delivery</button>
-          <button class="pill" data-filter="completed">Done</button>
+          <button class="pill" data-filter="collection">Collection</button>
+          <button class="pill" data-filter="completed">Completed</button>
           <button class="pill" data-filter="cancelled">Cancelled</button>
         </div>
       </div>
@@ -537,8 +538,8 @@ a { color: inherit; text-decoration: none; }
 <script>
 // ── Config ──────────────────────────────────────────────────
 // Fill these in before deploying
-const SUPABASE_URL  = 'https://pokjjlvrtakarcnblljh.supabase.co';
-const SUPABASE_ANON = 'sb_publishable_Tciww7ztWF4Nfqve_E_ZHg_TPlLgTlg';
+const SUPABASE_URL  = 'YOUR_SUPABASE_URL';
+const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY';
 
 // ── Init ────────────────────────────────────────────────────
 const { createClient } = supabase;
@@ -654,7 +655,8 @@ function filterReferrals() {
 
     const matchesFilter = activeFilter === 'all'      ? true
       : activeFilter === 'active'    ? !['completed','cancelled'].includes(status)
-      : activeFilter === 'delivery'  ? r.fulfilment_type === 'delivery'
+      : activeFilter === 'delivery'   ? r.fulfilment_type === 'delivery'
+      : activeFilter === 'collection' ? r.fulfilment_type === 'collection'
       : activeFilter === 'completed' ? status === 'completed'
       : activeFilter === 'cancelled' ? status === 'cancelled'
       : true;
@@ -692,7 +694,7 @@ function renderList() {
         <div class="ref-name">${esc(name)}</div>
         ${org ? `<div class="ref-org">${esc(org)}</div>` : ''}
         <div class="tags">
-          <span class="tag tag-${r.fulfilment_type}">${r.fulfilment_type}</span>
+          <span class="tag tag-${r.fulfilment_type}">${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span>
           <span class="tag tag-${statusKey(status)}">${statusLabel(status)}</span>
           ${crises.map(c => `<span class="tag tag-crisis">${esc(shortCrisis(c))}</span>`).join('')}
           ${r.clients?.vulnerable ? '<span class="tag tag-vuln">Vulnerable</span>' : ''}
@@ -789,7 +791,7 @@ function renderDetail(r) {
       ${r.cancelled_at ? `<div class="cancelled-banner">⚠️ Cancelled${r.cancellation_reason ? ' · ' + esc(r.cancellation_reason) : ''}</div>` : ''}
 
       <div class="stat-row">
-        <div class="stat"><label>Type</label><span>${r.fulfilment_type}</span></div>
+        <div class="stat"><label>Type</label><span>${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span></div>
         <div class="stat"><label>Status</label><span class="stat-${statusKey(status)}">${statusLabel(status)}</span></div>
         <div class="stat"><label>Adults</label><span>${r.adults_count ?? '—'}</span></div>
         <div class="stat"><label>Children</label><span>${r.children_count ?? '—'}</span></div>
@@ -820,7 +822,7 @@ function renderDetail(r) {
           <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + esc(ref.phone) : ''}</span></div>
           <div class="field"><label>Organisation</label><span>${esc(ref.organisation || '—')}</span></div>
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-          ${r.notes ? `<div class="field"><label>Notes</label><span>${esc(r.notes)}</span></div>` : ''}
+
         </div>` : `
         <div class="card">
           <div class="card-title">Referrer</div>
@@ -828,7 +830,7 @@ function renderDetail(r) {
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
           ${ref.phone ? `<div class="field"><label>Phone</label><span>${esc(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-          ${r.notes ? `<div class="field"><label>Notes</label><span>${esc(r.notes)}</span></div>` : ''}
+
         </div>`}
       </div>
 
