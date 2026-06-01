@@ -513,7 +513,10 @@ a { color: inherit; text-decoration: none; }
     <!-- Sidebar -->
     <div class="sidebar">
       <div class="sidebar-top">
-        <input id="search" class="search-input" type="search" placeholder="Search name, ref, org…" />
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="search" class="search-input" type="search" placeholder="Search name, ref, org…" style="flex:1;" />
+          <button id="sort-btn" title="Sort order" style="flex-shrink:0;padding:6px 10px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--bg);font-size:14px;line-height:1;cursor:pointer;transition:background .12s;" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='var(--bg)'">↓</button>
+        </div>
         <div class="filter-row">
           <button class="pill active" data-filter="all">All</button>
           <button class="pill" data-filter="active">Active</button>
@@ -545,6 +548,7 @@ let allReferrals   = [];
 let selectedRef    = null;
 let activeFilter   = 'all';
 let searchQuery    = '';
+let sortAscending  = false;
 
 // ── Auth ────────────────────────────────────────────────────
 async function initAuth() {
@@ -645,7 +649,7 @@ function fmtDateTime(ts) {
 
 // ── List ────────────────────────────────────────────────────
 function filterReferrals() {
-  return allReferrals.filter(r => {
+  const filtered = allReferrals.filter(r => {
     const status = deriveStatus(r);
     const q = searchQuery.toLowerCase();
 
@@ -665,6 +669,10 @@ function filterReferrals() {
     ].filter(Boolean).some(v => v.toLowerCase().includes(q));
 
     return matchesFilter && matchesSearch;
+  });
+  return filtered.sort((a, b) => {
+    const diff = a.referral_number - b.referral_number;
+    return sortAscending ? diff : -diff;
   });
 }
 
@@ -734,6 +742,12 @@ document.querySelectorAll('.pill').forEach(btn => {
     activeFilter = btn.dataset.filter;
     renderList();
   });
+});
+
+document.getElementById('sort-btn').addEventListener('click', () => {
+  sortAscending = !sortAscending;
+  document.getElementById('sort-btn').textContent = sortAscending ? '↑' : '↓';
+  renderList();
 });
 
 document.getElementById('search').addEventListener('input', e => {
