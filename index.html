@@ -731,7 +731,9 @@ a { color: inherit; text-decoration: none; }
 <script>
 // ── Init ────────────────────────────────────────────────────
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { flowType: 'implicit' }
+});
 
 let allReferrals   = [];
 let selectedRef    = null;
