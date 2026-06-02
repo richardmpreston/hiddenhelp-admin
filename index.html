@@ -779,7 +779,7 @@ document.getElementById('login-btn').addEventListener('click', async () => {
   msg.textContent = '';
   const { error } = await db.auth.signInWithOtp({
     email,
-    options: { emailRedirectTo: window.location.href }
+    options: { emailRedirectTo: window.location.origin + window.location.pathname }
   });
   btn.disabled   = false;
   btn.textContent = 'Send magic link';
