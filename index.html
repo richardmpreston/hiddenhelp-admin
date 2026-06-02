@@ -741,6 +741,8 @@ let selectedRef    = null;
 let activeFilter   = 'all';
 let searchQuery    = '';
 let sortAscending  = false;
+const WISHLIST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSej2Tb1f1qxZcaiQ-Zrv77afU4nwIDL8PPO-LM-jguJPakLsQ/viewform?entry.1663179449=';
+
 let editingSection = null;  // 'milestones' | 'payment' | null
 let showCancelForm = false;
 let volunteers     = [];
@@ -1095,6 +1097,7 @@ function renderDetail(r) {
         <p>${esc(ref.organisation || ref.name || '')}${ref.name && ref.organisation ? ' · ' + esc(ref.name) : ''} · referred ${fmtDate(r.received_at || r.created_at)}</p>
       </div>
       <div class="detail-actions">
+        ${!r.wishlist_submitted_at && !r.cancelled_at ? `<button class="btn" id="wishlist-link-btn" onclick="copyWishlistUrl(${r.referral_number})">📋 Copy wishlist link</button>` : ''}
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-maps">📍 Maps</a>` : ''}
         <button class="btn" onclick="refreshSelected()">↻ Refresh</button>
       </div>
@@ -1290,6 +1293,18 @@ async function saveNotes(referralId) {
     const r = allReferrals.find(x => x.id === referralId);
     if (r) r.notes = text;
   }
+}
+
+// ── Wishlist link ────────────────────────────────────────────
+function copyWishlistUrl(referralNumber) {
+  const url = WISHLIST_FORM_URL + referralNumber;
+  navigator.clipboard.writeText(url).then(() => {
+    const btn = document.getElementById('wishlist-link-btn');
+    if (btn) {
+      btn.textContent = '✓ Copied!';
+      setTimeout(() => { btn.textContent = '📋 Copy wishlist link'; }, 2000);
+    }
+  });
 }
 
 // ── Refresh ─────────────────────────────────────────────────
