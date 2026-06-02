@@ -941,6 +941,13 @@ function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+function fmtPhone(s) {
+  if (!s) return '';
+  // Convert +447... → 07...
+  const n = String(s).replace(/^\+44/, '0');
+  return esc(n);
+}
+
 // ── Filters ─────────────────────────────────────────────────
 document.querySelectorAll('.pill').forEach(btn => {
   btn.addEventListener('click', () => {
@@ -1108,7 +1115,7 @@ function renderDetail(r) {
             <label>Name</label>
             <span>${esc(name)}${client.vulnerable ? ' <span class="tag tag-vuln" style="margin-left:6px">Vulnerable</span>' : ''}</span>
           </div>
-          ${client.phone ? `<div class="field"><label>Phone</label><span>${esc(client.phone)}</span></div>` : ''}
+          ${client.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(client.phone)}</span></div>` : ''}
           ${client.client_secondary_contact ? `<div class="field"><label>Secondary contact</label><span>${esc(client.client_secondary_contact)}</span></div>` : ''}
           ${client.postcode ? `<div class="field"><label>Postcode</label><span>${esc(client.postcode)}</span></div>` : ''}
           ${r.can_help_lift !== null ? `<div class="field"><label>Can help lift</label><span style="color:${r.can_help_lift ? 'var(--green)' : 'var(--red)'}">${r.can_help_lift ? 'Yes' : 'No'}</span></div>` : ''}
@@ -1124,7 +1131,7 @@ function renderDetail(r) {
             ${client.geocoded_address ? esc(client.geocoded_address).replace(/, /g,'<br>') : (client.address ? esc(client.address) : '<span style="color:var(--text3)">No address recorded</span>')}
             ${client.geocode_partial ? '<div class="address-note">⚠️ Partial match — verify before delivery</div>' : ''}
           </div>
-          <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + esc(ref.phone) : ''}</span></div>
+          <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + fmtPhone(ref.phone) : ''}</span></div>
           <div class="field"><label>Organisation</label><span>${esc(ref.organisation || '—')}</span></div>
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
         </div>` : `
@@ -1132,7 +1139,7 @@ function renderDetail(r) {
           <div class="card-title">Referrer</div>
           <div class="field"><label>Name</label><span>${esc(ref.name || '—')}</span></div>
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
-          ${ref.phone ? `<div class="field"><label>Phone</label><span>${esc(ref.phone)}</span></div>` : ''}
+          ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
         </div>`}
       </div>
