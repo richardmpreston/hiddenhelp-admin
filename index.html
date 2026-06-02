@@ -42,7 +42,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; font-family: var(--font); font-size: 14px; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
 button { font-family: var(--font); cursor: pointer; border: none; background: none; }
-input, textarea { font-family: var(--font); }
+input, textarea, select { font-family: var(--font); }
 a { color: inherit; text-decoration: none; }
 
 /* ── Login ─────────────────────────────────────────────────── */
@@ -360,6 +360,12 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: .07em;
   margin-bottom: 10px;
 }
+.card-title-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.card-title-row .card-title { margin-bottom: 0; flex: 1; }
 .field { margin-bottom: 8px; }
 .field:last-child { margin-bottom: 0; }
 .field label { font-size: 11px; color: var(--text3); display: block; margin-bottom: 2px; font-weight: 500; }
@@ -449,6 +455,188 @@ a { color: inherit; text-decoration: none; }
 }
 .notes-save:hover { opacity: .85; }
 
+/* ── Edit controls ─────────────────────────────────────────── */
+.btn-edit-card {
+  font-size: 11px;
+  color: var(--text3);
+  padding: 2px 9px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  transition: all .12s;
+  white-space: nowrap;
+}
+.btn-edit-card:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+.btn-edit-card.active { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
+.ms-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+}
+.ms-edit-row:last-of-type { border-bottom: none; }
+.ms-edit-label {
+  font-size: 12px;
+  color: var(--text2);
+  width: 130px;
+  flex-shrink: 0;
+}
+.ms-dt-input {
+  flex: 1;
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  font-family: var(--font);
+}
+.ms-dt-input:focus { border-color: var(--accent); }
+.btn-now {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 9px;
+  background: var(--bg2);
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: all .12s;
+}
+.btn-now:hover { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); }
+
+.vol-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 2px;
+}
+.vol-select {
+  flex: 1;
+  font-size: 12px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  outline: none;
+}
+.vol-select:focus { border-color: var(--accent); }
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  padding-top: 10px;
+  margin-top: 2px;
+  border-top: 1px solid var(--border);
+}
+.btn-save-edit {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 16px;
+  background: var(--accent);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  border: none;
+  transition: opacity .12s;
+}
+.btn-save-edit:hover { opacity: .85; }
+.btn-cancel-edit {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 12px;
+  background: var(--bg);
+  color: var(--text2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  transition: background .12s;
+}
+.btn-cancel-edit:hover { background: var(--bg2); }
+
+.pay-date-input {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text);
+  outline: none;
+  font-family: var(--font);
+}
+.pay-date-input:focus { border-color: var(--accent); }
+
+/* ── Actions card ──────────────────────────────────────────── */
+.action-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+}
+.action-card-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  margin-bottom: 10px;
+}
+.action-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn-do-cancel {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid #F3BEBE;
+  border-radius: var(--radius-sm);
+  background: var(--red-bg);
+  color: var(--red);
+  transition: opacity .12s;
+}
+.btn-do-cancel:hover { opacity: .8; }
+.btn-do-uncomplete {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text2);
+  transition: background .12s;
+}
+.btn-do-uncomplete:hover { background: var(--bg2); }
+.cancel-reason-area {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: var(--font);
+  color: var(--text);
+  background: var(--bg);
+  resize: none;
+  height: 60px;
+  outline: none;
+  margin-top: 8px;
+  display: block;
+}
+.cancel-reason-area:focus { border-color: var(--red); }
+.btn-confirm-cancel {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 16px;
+  background: var(--red);
+  color: #fff;
+  border-radius: var(--radius-sm);
+  border: none;
+  transition: opacity .12s;
+}
+.btn-confirm-cancel:hover { opacity: .85; }
+
 /* ── Banner ────────────────────────────────────────────────── */
 .cancelled-banner {
   background: var(--red-bg);
@@ -484,6 +672,7 @@ a { color: inherit; text-decoration: none; }
   .stat-row { grid-template-columns: 1fr 1fr; }
   .detail-header { flex-direction: column; gap: 10px; }
   .detail-actions { width: 100%; justify-content: flex-end; }
+  .ms-edit-label { width: 100px; }
 }
 </style>
 </head>
@@ -549,6 +738,9 @@ let selectedRef    = null;
 let activeFilter   = 'all';
 let searchQuery    = '';
 let sortAscending  = false;
+let editingSection = null;  // 'milestones' | 'payment' | null
+let showCancelForm = false;
+let volunteers     = [];
 
 // ── Auth ────────────────────────────────────────────────────
 async function initAuth() {
@@ -571,6 +763,7 @@ function showApp(user) {
   document.getElementById('login-screen').style.display = 'none';
   document.getElementById('app').classList.add('visible');
   document.getElementById('user-email').textContent = user.email;
+  loadVolunteers();
   loadReferrals();
 }
 
@@ -617,7 +810,16 @@ async function loadReferrals() {
 
   if (error) { console.error(error); return; }
   allReferrals = data || [];
+  if (selectedRef) {
+    const updated = allReferrals.find(x => x.id === selectedRef.id);
+    if (updated) { selectedRef = updated; renderDetail(selectedRef); }
+  }
   renderList();
+}
+
+async function loadVolunteers() {
+  const { data } = await db.from('volunteers').select('id, name').eq('active', true).order('name');
+  volunteers = data || [];
 }
 
 function deriveStatus(r) {
@@ -645,6 +847,20 @@ function fmtDateTime(ts) {
   const d = new Date(ts);
   return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
     + ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+}
+
+function toInputDatetime(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function toInputDate(ts) {
+  if (!ts) return '';
+  const d = new Date(ts);
+  const p = n => String(n).padStart(2, '0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`;
 }
 
 // ── List ────────────────────────────────────────────────────
@@ -687,7 +903,6 @@ function renderList() {
     const status  = deriveStatus(r);
     const name    = [r.clients?.first_name, r.clients?.last_name].filter(Boolean).join(' ') || '—';
     const org     = r.referrers?.organisation || r.referrers?.name || '';
-    const crises  = crisisNames(r).slice(0, 1);
     const isSelected = selectedRef?.referral_number === r.referral_number;
     return `
       <div class="ref-item${isSelected ? ' selected' : ''}" data-ref="${r.referral_number}">
@@ -700,8 +915,6 @@ function renderList() {
         <div class="tags">
           <span class="tag tag-${r.fulfilment_type}">${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span>
           <span class="tag tag-${statusKey(status)}">${statusLabel(status)}</span>
-
-
         </div>
       </div>`;
   }).join('');
@@ -721,14 +934,6 @@ function statusKey(s) {
 function statusLabel(s) {
   return { 'completed': 'Completed', 'cancelled': 'Cancelled', 'gathered': 'Gathered',
            'awaiting gathering': 'Awaiting gathering', 'awaiting wishlist': 'Awaiting wishlist', 'new': 'New' }[s] || s;
-}
-function shortCrisis(c) {
-  if (!c) return '';
-  const m = { 'Homeless rehousing': 'Homeless', 'Domestic violence': 'DV',
-              'Sickness/disability/mental health': 'Health', 'Rehabilitation of offender': 'Rehab',
-              'Asylum seeker/refugee': 'Asylum', 'Veteran assistance': 'Veteran',
-              'Financial hardship': 'Financial', 'Unemployed': 'Unemployed', 'Other': 'Other' };
-  return m[c] || c;
 }
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -757,7 +962,9 @@ document.getElementById('search').addEventListener('input', e => {
 
 // ── Detail ──────────────────────────────────────────────────
 function selectReferral(r) {
-  selectedRef = r;
+  selectedRef    = r;
+  editingSection = null;
+  showCancelForm = false;
   renderList();
   renderDetail(r);
 }
@@ -771,19 +978,104 @@ function renderDetail(r) {
   const crises = crisisNames(r);
   const items  = (r.wishlist_items || []).sort((a,b) => a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
 
-  const mapsUrl = (r.clients?.latitude && r.clients?.longitude)
+  const mapsUrl = (client.latitude && client.longitude)
     ? `https://www.google.com/maps?q=${client.latitude},${client.longitude}`
     : null;
 
-  // Milestones
-  const milestones = [
-    { label: 'Referral received',  ts: r.received_at },
-    { label: 'Wishlist submitted', ts: r.wishlist_submitted_at },
-    { label: 'Client contacted',   ts: r.client_contacted_at },
-    { label: 'Items gathered',     ts: r.gathered_at },
-    { label: r.fulfilment_type === 'delivery' ? 'Delivered' : 'Completed', ts: r.completed_at },
+  // Milestones view
+  const msFields = [
+    { label: 'Referral received',  field: 'received_at',          ts: r.received_at },
+    { label: 'Wishlist submitted', field: 'wishlist_submitted_at', ts: r.wishlist_submitted_at },
+    { label: 'Client contacted',   field: 'client_contacted_at',  ts: r.client_contacted_at },
+    { label: 'Items gathered',     field: 'gathered_at',           ts: r.gathered_at },
+    { label: r.fulfilment_type === 'delivery' ? 'Delivered' : 'Completed', field: 'completed_at', ts: r.completed_at },
   ];
-  const firstPending = milestones.findIndex(m => !m.ts && status !== 'cancelled');
+  const firstPending = msFields.findIndex(m => !m.ts && status !== 'cancelled');
+
+  const milestonesView = msFields.map((m,i) => {
+    const done = !!m.ts;
+    const next = !done && i === firstPending;
+    return `<div class="ms-row">
+      <div class="ms-dot ${done ? 'ms-dot-done' : next ? 'ms-dot-next' : 'ms-dot-pending'}"></div>
+      <span class="ms-label">${m.label}</span>
+      <span class="ms-date">${done ? fmtDateTime(m.ts) : '—'}</span>
+    </div>`;
+  }).join('')
+  + (r.gathered_by_id ? `<div class="ms-row"><div class="ms-dot ms-dot-done"></div><span class="ms-label">Gathered by</span><span class="ms-date">${esc(r.gathered_vol?.name || '—')}</span></div>` : '')
+  + (r.delivered_by_id ? `<div class="ms-row"><div class="ms-dot ms-dot-done"></div><span class="ms-label">Delivered by</span><span class="ms-date">${esc(r.delivered_vol?.name || '—')}</span></div>` : '');
+
+  const volOpts = (currentId) => `<option value="">— unassigned —</option>`
+    + volunteers.map(v => `<option value="${v.id}"${v.id === currentId ? ' selected' : ''}>${esc(v.name)}</option>`).join('');
+
+  const milestonesEdit = msFields.map(m => `
+    <div class="ms-edit-row">
+      <span class="ms-edit-label">${m.label}</span>
+      <input type="datetime-local" id="ms-${m.field}" class="ms-dt-input" value="${esc(toInputDatetime(m.ts))}">
+      <button class="btn-now" onclick="fillMsNow('${m.field}')">Now</button>
+    </div>`).join('')
+  + `<div class="vol-edit-row">
+      <span class="ms-edit-label">Gathered by</span>
+      <select id="vol-gathered" class="vol-select">${volOpts(r.gathered_by_id)}</select>
+      <button class="btn-now" onclick="saveVolunteer(${r.id},'gathered_by_id','vol-gathered')">Save</button>
+    </div>`
+  + (r.fulfilment_type === 'delivery' ? `
+    <div class="vol-edit-row">
+      <span class="ms-edit-label">Delivered by</span>
+      <select id="vol-delivered" class="vol-select">${volOpts(r.delivered_by_id)}</select>
+      <button class="btn-now" onclick="saveVolunteer(${r.id},'delivered_by_id','vol-delivered')">Save</button>
+    </div>` : '')
+  + `<div class="edit-actions">
+      <button class="btn-save-edit" onclick="saveMilestones(${r.id})">Save dates</button>
+      <button class="btn-cancel-edit" onclick="toggleEdit('milestones')">Cancel</button>
+    </div>`;
+
+  // Payment view/edit
+  const paymentView = r.payment_recipient ? `
+    <div class="pay-row"><span class="pay-label">Recipient</span><span class="pay-value">${esc(r.payment_recipient)}</span></div>
+    <div class="pay-row"><span class="pay-label">Method</span><span class="pay-value">${esc(r.payment_method || '—')}</span></div>
+    <div class="pay-row"><span class="pay-label">Sent</span><span class="pay-value">${fmtDate(r.payment_sent_at)}</span></div>
+    <div class="pay-row"><span class="pay-label">Received</span><span class="pay-value ${r.payment_received_at ? '' : 'stat-wishlist'}">${fmtDate(r.payment_received_at)}</span></div>
+    ${r.scheduled_date ? `<div class="pay-row" style="margin-top:8px"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}
+  ` : `<div style="font-size:13px;color:var(--text3)">No payment required</div>
+    ${r.scheduled_date ? `<div class="pay-row" style="margin-top:8px"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}`;
+
+  const paymentEdit = r.payment_recipient ? `
+    <div class="pay-row"><span class="pay-label">Recipient</span><span class="pay-value">${esc(r.payment_recipient)}</span></div>
+    <div class="pay-row"><span class="pay-label">Method</span><span class="pay-value">${esc(r.payment_method || '—')}</span></div>
+    <div class="pay-row">
+      <span class="pay-label">Sent</span>
+      <input type="date" id="pay-sent-input" class="pay-date-input" value="${esc(toInputDate(r.payment_sent_at))}">
+    </div>
+    <div class="pay-row">
+      <span class="pay-label">Received</span>
+      <input type="date" id="pay-recv-input" class="pay-date-input" value="${esc(toInputDate(r.payment_received_at))}">
+    </div>
+    ${r.scheduled_date ? `<div class="pay-row"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}
+    <div class="edit-actions">
+      <button class="btn-save-edit" onclick="savePayment(${r.id})">Save</button>
+      <button class="btn-cancel-edit" onclick="toggleEdit('payment')">Cancel</button>
+    </div>
+  ` : paymentView;
+
+  // Actions card
+  const actionsCard = `
+    <div class="action-card">
+      <div class="action-card-title">Actions</div>
+      ${showCancelForm ? `
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;">Cancellation reason (optional)</div>
+        <textarea id="cancel-reason" class="cancel-reason-area" placeholder="e.g. Client no longer needs help…"></textarea>
+        <div class="edit-actions">
+          <button class="btn-confirm-cancel" onclick="cancelReferral(${r.id})">Confirm cancel</button>
+          <button class="btn-cancel-edit" onclick="toggleCancelForm()">Back</button>
+        </div>
+      ` : `
+        <div class="action-buttons">
+          ${!r.cancelled_at ? `<button class="btn-do-cancel" onclick="toggleCancelForm()">Cancel referral</button>` : ''}
+          ${(r.completed_at || r.cancelled_at) ? `<button class="btn-do-uncomplete" onclick="uncompleteReferral(${r.id})">${r.cancelled_at ? 'Uncancel' : 'Unmark as completed'}</button>` : ''}
+          ${(!r.cancelled_at && !r.completed_at) ? `<span style="font-size:12px;color:var(--text3)">Mark gathered/completed via Telegram bot, or use milestone edit above.</span>` : ''}
+        </div>
+      `}
+    </div>`;
 
   panel.innerHTML = `
     <div class="detail-header">
@@ -793,7 +1085,7 @@ function renderDetail(r) {
       </div>
       <div class="detail-actions">
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-maps">📍 Maps</a>` : ''}
-        <button class="btn" onclick="loadReferrals()">↻ Refresh</button>
+        <button class="btn" onclick="refreshSelected()">↻ Refresh</button>
       </div>
     </div>
     <div class="detail-body">
@@ -833,7 +1125,6 @@ function renderDetail(r) {
           <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + esc(ref.phone) : ''}</span></div>
           <div class="field"><label>Organisation</label><span>${esc(ref.organisation || '—')}</span></div>
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-
         </div>` : `
         <div class="card">
           <div class="card-title">Referrer</div>
@@ -841,35 +1132,24 @@ function renderDetail(r) {
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
           ${ref.phone ? `<div class="field"><label>Phone</label><span>${esc(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-
         </div>`}
       </div>
 
       <div class="two-col">
         <div class="card">
-          <div class="card-title">Milestones</div>
-          ${milestones.map((m,i) => {
-            const done = !!m.ts;
-            const next = !done && i === firstPending;
-            return `<div class="ms-row">
-              <div class="ms-dot ${done ? 'ms-dot-done' : next ? 'ms-dot-next' : 'ms-dot-pending'}"></div>
-              <span class="ms-label">${m.label}</span>
-              <span class="ms-date">${done ? fmtDateTime(m.ts) : '—'}</span>
-            </div>`;
-          }).join('')}
-          ${r.gathered_by_id ? `<div class="ms-row"><div class="ms-dot ms-dot-done"></div><span class="ms-label">Gathered by</span><span class="ms-date">${esc(r.gathered_vol?.name || '—')}</span></div>` : ''}
-          ${r.delivered_by_id ? `<div class="ms-row"><div class="ms-dot ms-dot-done"></div><span class="ms-label">Delivered by</span><span class="ms-date">${esc(r.delivered_vol?.name || '—')}</span></div>` : ''}
+          <div class="card-title-row">
+            <div class="card-title">Milestones</div>
+            <button class="btn-edit-card${editingSection==='milestones'?' active':''}" onclick="toggleEdit('milestones')">${editingSection==='milestones'?'Cancel':'Edit'}</button>
+          </div>
+          ${editingSection === 'milestones' ? milestonesEdit : milestonesView}
         </div>
 
         <div class="card">
-          <div class="card-title">Payment</div>
-          ${r.payment_recipient ? `
-          <div class="pay-row"><span class="pay-label">Recipient</span><span class="pay-value">${esc(r.payment_recipient)}</span></div>
-          <div class="pay-row"><span class="pay-label">Method</span><span class="pay-value">${esc(r.payment_method || '—')}</span></div>
-          <div class="pay-row"><span class="pay-label">Sent</span><span class="pay-value">${fmtDate(r.payment_sent_at)}</span></div>
-          <div class="pay-row"><span class="pay-label">Received</span><span class="pay-value ${r.payment_received_at ? '' : 'stat-wishlist'}">${fmtDate(r.payment_received_at)}</span></div>
-          ` : `<div style="font-size:13px;color:var(--text3)">No payment required</div>`}
-          ${r.scheduled_date ? `<div class="pay-row" style="margin-top:8px"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}
+          <div class="card-title-row">
+            <div class="card-title">Payment</div>
+            ${r.payment_recipient ? `<button class="btn-edit-card${editingSection==='payment'?' active':''}" onclick="toggleEdit('payment')">${editingSection==='payment'?'Cancel':'Edit'}</button>` : ''}
+          </div>
+          ${editingSection === 'payment' ? paymentEdit : paymentView}
         </div>
       </div>
 
@@ -894,6 +1174,8 @@ function renderDetail(r) {
         <button class="notes-save" onclick="saveNotes(${r.id})">Save note</button>
       </div>
 
+      ${actionsCard}
+
     </div>`;
 }
 
@@ -909,6 +1191,87 @@ function formatChildAges(ages) {
   return `<div class="field"><label>Children</label><span>${parts.join(', ')}</span></div>`;
 }
 
+// ── Edit helpers ────────────────────────────────────────────
+function toggleEdit(section) {
+  editingSection = editingSection === section ? null : section;
+  showCancelForm = false;
+  renderDetail(selectedRef);
+}
+
+function toggleCancelForm() {
+  showCancelForm = !showCancelForm;
+  renderDetail(selectedRef);
+}
+
+function fillMsNow(field) {
+  const el = document.getElementById('ms-' + field);
+  if (el) el.value = toInputDatetime(new Date().toISOString());
+}
+
+async function patchReferral(id, fields) {
+  const { error } = await db.from('referrals').update(fields).eq('id', id);
+  if (error) { console.error('Patch error:', error); alert('Save failed: ' + error.message); return false; }
+  const idx = allReferrals.findIndex(x => x.id === id);
+  if (idx >= 0) {
+    Object.assign(allReferrals[idx], fields);
+    selectedRef = allReferrals[idx];
+  }
+  renderList();
+  renderDetail(selectedRef);
+  return true;
+}
+
+async function saveMilestones(id) {
+  const r = allReferrals.find(x => x.id === id);
+  const fields = ['received_at','wishlist_submitted_at','client_contacted_at','gathered_at','completed_at'];
+  const update = {};
+  for (const f of fields) {
+    const el = document.getElementById('ms-' + f);
+    if (!el) continue;
+    update[f] = el.value ? new Date(el.value).toISOString() : null;
+  }
+  if (update.completed_at && r?.cancelled_at) {
+    alert('Cannot mark as completed while the referral is cancelled — uncancel it first.');
+    return;
+  }
+  editingSection = null;
+  await patchReferral(id, update);
+}
+
+async function saveVolunteer(id, field, selectId) {
+  const val = document.getElementById(selectId)?.value || null;
+  await patchReferral(id, { [field]: val || null });
+}
+
+async function savePayment(id) {
+  const sent = document.getElementById('pay-sent-input')?.value;
+  const recv = document.getElementById('pay-recv-input')?.value;
+  editingSection = null;
+  await patchReferral(id, {
+    payment_sent_at:     sent ? new Date(sent).toISOString() : null,
+    payment_received_at: recv ? new Date(recv).toISOString() : null,
+  });
+}
+
+async function cancelReferral(id) {
+  const reason = document.getElementById('cancel-reason')?.value?.trim() || null;
+  showCancelForm = false;
+  await patchReferral(id, {
+    cancelled_at:        new Date().toISOString(),
+    cancellation_reason: reason,
+    completed_at:        null,
+  });
+}
+
+async function uncompleteReferral(id) {
+  await patchReferral(id, {
+    completed_at:        null,
+    cancelled_at:        null,
+    cancellation_reason: null,
+  });
+}
+
+// ── Notes ───────────────────────────────────────────────────
 async function saveNotes(referralId) {
   const text = document.getElementById('notes-area')?.value || '';
   const { error } = await db.from('referrals').update({ notes: text }).eq('id', referralId);
@@ -916,6 +1279,11 @@ async function saveNotes(referralId) {
     const r = allReferrals.find(x => x.id === referralId);
     if (r) r.notes = text;
   }
+}
+
+// ── Refresh ─────────────────────────────────────────────────
+async function refreshSelected() {
+  await loadReferrals();
 }
 
 // ── Boot ────────────────────────────────────────────────────
