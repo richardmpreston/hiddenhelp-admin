@@ -625,6 +625,18 @@ a { color: inherit; text-decoration: none; }
   display: block;
 }
 .cancel-reason-area:focus { border-color: var(--red); }
+.btn-do-convert {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border: 1px solid #B5CEFF;
+  border-radius: var(--radius-sm);
+  background: var(--blue-bg);
+  color: var(--blue);
+  transition: opacity .12s;
+}
+.btn-do-convert:hover { opacity: .8; }
+
 .btn-confirm-cancel {
   font-size: 12px;
   font-weight: 500;
@@ -743,8 +755,9 @@ let searchQuery    = '';
 let sortAscending  = false;
 const WISHLIST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSej2Tb1f1qxZcaiQ-Zrv77afU4nwIDL8PPO-LM-jguJPakLsQ/viewform?entry.175428476=';
 
-let editingSection = null;  // 'milestones' | 'payment' | null
-let showCancelForm = false;
+let editingSection  = null;  // 'milestones' | 'payment' | null
+let showCancelForm  = false;
+let showConvertForm = false;
 let volunteers     = [];
 
 // ── Auth ────────────────────────────────────────────────────
@@ -975,9 +988,10 @@ document.getElementById('search').addEventListener('input', e => {
 
 // ── Detail ──────────────────────────────────────────────────
 function selectReferral(r) {
-  selectedRef    = r;
-  editingSection = null;
-  showCancelForm = false;
+  selectedRef     = r;
+  editingSection  = null;
+  showCancelForm  = false;
+  showConvertForm = false;
   renderList();
   renderDetail(r);
 }
@@ -1081,9 +1095,36 @@ function renderDetail(r) {
           <button class="btn-confirm-cancel" onclick="cancelReferral(${r.id})">Confirm cancel</button>
           <button class="btn-cancel-edit" onclick="toggleCancelForm()">Back</button>
         </div>
+      ` : showConvertForm ? `
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;">Convert to delivery</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;">Delivery address</div>
+        <textarea id="convert-address" class="cancel-reason-area" style="height:72px;" placeholder="Full delivery address…"></textarea>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px;">
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;">Payment recipient</div>
+            <select id="convert-pay-recipient" class="vol-select">
+              <option value="">— none —</option>
+              <option value="referrer">Referrer</option>
+              <option value="client">Client</option>
+            </select>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:4px;font-weight:500;">Payment method</div>
+            <select id="convert-pay-method" class="vol-select">
+              <option value="">— none —</option>
+              <option value="link">Link</option>
+              <option value="invoice">Invoice</option>
+            </select>
+          </div>
+        </div>
+        <div class="edit-actions">
+          <button class="btn-save-edit" onclick="convertToDelivery(${r.id}, ${client.id})">Confirm conversion</button>
+          <button class="btn-cancel-edit" onclick="toggleConvertForm()">Back</button>
+        </div>
       ` : `
         <div class="action-buttons">
           ${!r.cancelled_at ? `<button class="btn-do-cancel" onclick="toggleCancelForm()">Cancel referral</button>` : ''}
+          ${r.fulfilment_type === 'collection' && !r.cancelled_at ? `<button class="btn-do-convert" onclick="toggleConvertForm()">Convert to delivery</button>` : ''}
           ${(r.completed_at || r.cancelled_at) ? `<button class="btn-do-uncomplete" onclick="uncompleteReferral(${r.id})">${r.cancelled_at ? 'Uncancel' : 'Unmark as completed'}</button>` : ''}
           ${(!r.cancelled_at && !r.completed_at) ? `<span style="font-size:12px;color:var(--text3)">Mark gathered/completed via Telegram bot, or use milestone edit above.</span>` : ''}
         </div>
@@ -1213,7 +1254,14 @@ function toggleEdit(section) {
 }
 
 function toggleCancelForm() {
-  showCancelForm = !showCancelForm;
+  showCancelForm  = !showCancelForm;
+  showConvertForm = false;
+  renderDetail(selectedRef);
+}
+
+function toggleConvertForm() {
+  showConvertForm = !showConvertForm;
+  showCancelForm  = false;
   renderDetail(selectedRef);
 }
 
@@ -1281,6 +1329,26 @@ async function cancelReferral(id) {
     cancellation_reason: reason,
     completed_at:        null,
   });
+}
+
+async function patchClient(clientId, fields) {
+  const { error } = await db.from('clients').update(fields).eq('id', clientId);
+  if (error) { console.error('Client patch error:', error); return; }
+  allReferrals.forEach(r => {
+    if (r.clients?.id === clientId) Object.assign(r.clients, fields);
+  });
+}
+
+async function convertToDelivery(referralId, clientId) {
+  const address   = document.getElementById('convert-address')?.value?.trim() || null;
+  const recipient = document.getElementById('convert-pay-recipient')?.value || null;
+  const method    = document.getElementById('convert-pay-method')?.value || null;
+  if (address) await patchClient(clientId, { address });
+  const fields = { fulfilment_type: 'delivery' };
+  if (recipient) fields.payment_recipient = recipient;
+  if (method)    fields.payment_method    = method;
+  showConvertForm = false;
+  await patchReferral(referralId, fields);
 }
 
 async function uncompleteReferral(id) {
