@@ -1018,7 +1018,7 @@ function renderDetail(r) {
   + (r.delivered_by_id ? `<div class="ms-row"><div class="ms-dot ms-dot-done"></div><span class="ms-label">Delivered by</span><span class="ms-date">${esc(r.delivered_vol?.name || '—')}</span></div>` : '');
 
   const volOpts = (currentId) => `<option value="">— unassigned —</option>`
-    + volunteers.map(v => `<option value="${v.id}"${v.id === currentId ? ' selected' : ''}>${esc(v.name)}</option>`).join('');
+    + volunteers.map(v => `<option value="${v.id}"${String(v.id) === String(currentId) ? ' selected' : ''}>${esc(v.name)}</option>`).join('');
 
   const milestonesEdit = msFields.map(m => `
     <div class="ms-edit-row">
@@ -1253,8 +1253,9 @@ async function saveMilestones(id) {
 }
 
 async function saveVolunteer(id, field, selectId) {
-  const val = document.getElementById(selectId)?.value || null;
-  await patchReferral(id, { [field]: val || null });
+  const val = document.getElementById(selectId)?.value;
+  const parsed = val ? (isNaN(val) ? val : Number(val)) : null;
+  await patchReferral(id, { [field]: parsed });
 }
 
 async function savePayment(id) {
