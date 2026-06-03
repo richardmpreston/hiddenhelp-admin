@@ -1066,9 +1066,23 @@ function renderDetail(r) {
   ` : `<div style="font-size:13px;color:var(--text3)">No payment required</div>
     ${r.scheduled_date ? `<div class="pay-row" style="margin-top:8px"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}`;
 
-  const paymentEdit = r.payment_recipient ? `
-    <div class="pay-row"><span class="pay-label">Recipient</span><span class="pay-value">${esc(r.payment_recipient)}</span></div>
-    <div class="pay-row"><span class="pay-label">Method</span><span class="pay-value">${esc(r.payment_method || '—')}</span></div>
+  const paymentEdit = `
+    <div class="pay-row">
+      <span class="pay-label">Recipient</span>
+      <select id="pay-recipient-input" class="vol-select" style="max-width:140px;">
+        <option value="">— none —</option>
+        <option value="referrer"${r.payment_recipient==='referrer'?' selected':''}>Referrer</option>
+        <option value="client"${r.payment_recipient==='client'?' selected':''}>Client</option>
+      </select>
+    </div>
+    <div class="pay-row">
+      <span class="pay-label">Method</span>
+      <select id="pay-method-input" class="vol-select" style="max-width:140px;">
+        <option value="">— none —</option>
+        <option value="link"${r.payment_method==='link'?' selected':''}>Link</option>
+        <option value="invoice"${r.payment_method==='invoice'?' selected':''}>Invoice</option>
+      </select>
+    </div>
     <div class="pay-row">
       <span class="pay-label">Sent</span>
       <input type="date" id="pay-sent-input" class="pay-date-input" value="${esc(toInputDate(r.payment_sent_at))}">
@@ -1202,7 +1216,7 @@ function renderDetail(r) {
         <div class="card">
           <div class="card-title-row">
             <div class="card-title">Payment</div>
-            ${r.payment_recipient ? `<button class="btn-edit-card${editingSection==='payment'?' active':''}" onclick="toggleEdit('payment')">${editingSection==='payment'?'Cancel':'Edit'}</button>` : ''}
+            <button class="btn-edit-card${editingSection==='payment'?' active':''}" onclick="toggleEdit('payment')">${editingSection==='payment'?'Cancel':'Edit'}</button>
           </div>
           ${editingSection === 'payment' ? paymentEdit : paymentView}
         </div>
@@ -1312,10 +1326,14 @@ async function saveVolunteer(id, field, selectId) {
 }
 
 async function savePayment(id) {
-  const sent = document.getElementById('pay-sent-input')?.value;
-  const recv = document.getElementById('pay-recv-input')?.value;
-  editingSection = null;
+  const sent      = document.getElementById('pay-sent-input')?.value;
+  const recv      = document.getElementById('pay-recv-input')?.value;
+  const recipient = document.getElementById('pay-recipient-input')?.value || null;
+  const method    = document.getElementById('pay-method-input')?.value || null;
+  editingSection  = null;
   await patchReferral(id, {
+    payment_recipient:   recipient,
+    payment_method:      method,
     payment_sent_at:     sent ? new Date(sent).toISOString() : null,
     payment_received_at: recv ? new Date(recv).toISOString() : null,
   });
