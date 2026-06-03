@@ -1255,6 +1255,11 @@ async function saveMilestones(id) {
 async function saveVolunteer(id, field, selectId) {
   const val = document.getElementById(selectId)?.value;
   const parsed = val ? (isNaN(val) ? val : Number(val)) : null;
+  // Update joined name before patching so renderDetail sees it immediately
+  const volName = volunteers.find(v => String(v.id) === String(val))?.name || null;
+  const joinField = field === 'gathered_by_id' ? 'gathered_vol' : 'delivered_vol';
+  const r = allReferrals.find(x => x.id === id);
+  if (r) r[joinField] = volName ? { name: volName } : null;
   await patchReferral(id, { [field]: parsed });
 }
 
