@@ -1060,6 +1060,7 @@ function renderDetail(r) {
   const paymentView = r.payment_recipient ? `
     <div class="pay-row"><span class="pay-label">Recipient</span><span class="pay-value">${esc(r.payment_recipient)}</span></div>
     <div class="pay-row"><span class="pay-label">Method</span><span class="pay-value">${esc(r.payment_method || '—')}</span></div>
+    ${r.payment_notes ? `<div class="pay-row"><span class="pay-label">Details</span><span class="pay-value" style="white-space:pre-wrap">${esc(r.payment_notes)}</span></div>` : ''}
     <div class="pay-row"><span class="pay-label">Sent</span><span class="pay-value">${fmtDate(r.payment_sent_at)}</span></div>
     <div class="pay-row"><span class="pay-label">Received</span><span class="pay-value ${r.payment_received_at ? '' : 'stat-wishlist'}">${fmtDate(r.payment_received_at)}</span></div>
     ${r.scheduled_date ? `<div class="pay-row" style="margin-top:8px"><span class="pay-label">Scheduled</span><span class="pay-value">${fmtDate(r.scheduled_date)}</span></div>` : ''}
@@ -1183,6 +1184,7 @@ function renderDetail(r) {
           ${crises.length ? `<div class="field"><label>Crisis</label><span>${crises.map(esc).join(', ')}</span></div>` : ''}
           ${r.crisis_other_detail ? `<div class="field"><label>Crisis detail</label><span>${esc(r.crisis_other_detail)}</span></div>` : ''}
           ${formatChildAges(r.child_ages)}
+          ${r.client_notes ? `<div class="field"><label>Client notes</label><span style="white-space:pre-wrap">${esc(r.client_notes)}</span></div>` : ''}
         </div>
 
         ${r.fulfilment_type === 'delivery' ? `
@@ -1195,6 +1197,7 @@ function renderDetail(r) {
           <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + fmtPhone(ref.phone) : ''}</span></div>
           <div class="field"><label>Organisation</label><span>${esc(ref.organisation || '—')}</span></div>
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
+          ${r.referrer_notes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(r.referrer_notes)}</span></div>` : ''}
         </div>` : `
         <div class="card">
           <div class="card-title">Referrer</div>
@@ -1202,6 +1205,8 @@ function renderDetail(r) {
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
           ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
+          ${r.collection_instructions ? `<div class="field"><label>Collection instructions</label><span style="white-space:pre-wrap">${esc(r.collection_instructions)}</span></div>` : ''}
+          ${r.referrer_notes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(r.referrer_notes)}</span></div>` : ''}
         </div>`}
       </div>
 
@@ -1239,7 +1244,7 @@ function renderDetail(r) {
       </div>`}
 
       <div class="card">
-        <div class="card-title">Notes</div>
+        <div class="card-title">Admin notes</div>
         <textarea id="notes-area" class="notes-area" placeholder="Add a note…">${esc(r.notes || '')}</textarea>
         <button class="notes-save" onclick="saveNotes(${r.id})">Save note</button>
       </div>
