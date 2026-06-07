@@ -1153,6 +1153,7 @@ function renderDetail(r) {
       </div>
       <div class="detail-actions">
         ${!r.wishlist_submitted_at && !r.cancelled_at ? `<button class="btn" id="wishlist-link-btn" onclick="copyWishlistUrl(${r.referral_number})">📋 Copy wishlist link</button>` : ''}
+        ${r.wishlist_submitted_at ? `<a href="wishlist.html?ref=${r.referral_number}" target="_blank" class="btn">🗒 Wishlist</a>` : ''}
         ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-maps">📍 Maps</a>` : ''}
         <button class="btn" onclick="refreshSelected()">↻ Refresh</button>
       </div>

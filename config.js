@@ -4,3 +4,6 @@
 
 const SUPABASE_URL  = 'https://pokjjlvrtakarcnblljh.supabase.co';
 const SUPABASE_ANON = 'sb_publishable_Tciww7ztWF4Nfqve_E_ZHg_TPlLgTlg';
+
+// Email address for referral draft emails
+const REFERRAL_EMAIL_RECIPIENT = 'judy@hiddenhelp.org';
