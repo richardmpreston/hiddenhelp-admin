@@ -142,12 +142,19 @@ html, body {
 }
 .field:last-child { border-bottom: none; }
 .field label {
-  flex: 0 0 130px;
+  flex: 0 0 110px;
   color: var(--text3);
   font-size: 12px;
   padding-top: 1px;
 }
-.field span, .field a { color: var(--text); flex: 1; }
+.field span, .field a {
+  color: var(--text);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 /* ── Household stat row ────────────────────────────────────── */
 .stat-row {
@@ -358,7 +365,7 @@ html, body {
     </div>
     <div class="top-bar-actions no-print">
       <a href="index.html" class="btn">&#8592; Admin</a>
-      <button class="btn btn-print" onclick="window.print()">Print / Save PDF</button>
+      <button class="btn btn-print" onclick="printWishlist()">Print / Save PDF</button>
     </div>
   </div>
 
@@ -407,6 +414,14 @@ function esc(s) {
 function fmtDate(ts) {
   if (!ts) return '—';
   return new Date(ts).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function printWishlist() {
+  window.addEventListener('afterprint', function restore() {
+    document.getElementById('content').style.display = 'block';
+    window.removeEventListener('afterprint', restore);
+  });
+  window.print();
 }
 
 function fmtPhone(p) {
@@ -521,14 +536,14 @@ function render(r) {
       </div>
       <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + fmtPhone(ref.phone) : ''}</span></div>
       ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
-      ${ref.email ? `<div class="field"><label>Email</label><span>${esc(ref.email)}</span></div>` : ''}
+      ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
     </div>` : `
     <div class="card">
       <div class="card-title">Referrer</div>
       <div class="field"><label>Name</label><span>${esc(ref.name || '—')}</span></div>
       ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
       ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
-      ${ref.email ? `<div class="field"><label>Email</label><span>${esc(ref.email)}</span></div>` : ''}
+      ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
     </div>`;
 
   document.getElementById('info-cols').innerHTML = clientCard + rightCard;
