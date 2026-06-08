@@ -512,7 +512,7 @@ function render(r) {
 
   document.getElementById('stat-row').innerHTML = `
     <div class="stat"><label>Adults</label><span>${r.adults_count ?? '—'}<small style="font-size:12px;font-weight:400;color:var(--text3)">${adultSex}</small></span></div>
-    <div class="stat"><label>Children</label><span>${r.children_count ?? '—'}${childAges ? `<small style="font-size:11px;font-weight:400;color:var(--text3);display:block;margin-top:2px">${esc(childAges)}</small>` : ''}</span></div>
+    <div class="stat"><label>Children</label><span>${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}${childAges ? `<small style="font-size:11px;font-weight:400;color:var(--text3);display:block;margin-top:2px">${esc(childAges)}</small>` : ''}</span></div>
     <div class="stat"><label>Type</label><span style="font-size:14px">${typeTag}</span></div>
     ${liftTag ? `<div class="stat"><label>Lifting</label><span style="font-size:14px">${liftTag}</span></div>` : ''}
   `;
