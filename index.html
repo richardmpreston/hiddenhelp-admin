@@ -1167,7 +1167,7 @@ function renderDetail(r) {
         <div class="stat"><label>Type</label><span>${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span></div>
         <div class="stat"><label>Status</label><span class="stat-${statusKey(status)}">${statusLabel(status)}</span></div>
         <div class="stat"><label>Adults</label><span>${r.adults_count ?? '—'}${r.adults_by_sex ? ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (r.adults_by_sex.male ? r.adults_by_sex.male + 'M' : '') + (r.adults_by_sex.male && r.adults_by_sex.female ? '/' : '') + (r.adults_by_sex.female ? r.adults_by_sex.female + 'F' : '') + ')</span>' : ''}</span></div>
-        <div class="stat"><label>Children</label><span>${r.children_count ?? '—'}</span></div>
+        <div class="stat"><label>Children</label><span>${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
       </div>
 
       <div class="two-col">

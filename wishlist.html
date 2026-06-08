@@ -417,10 +417,14 @@ function fmtDate(ts) {
 }
 
 function printWishlist() {
-  window.addEventListener('afterprint', function restore() {
-    document.getElementById('content').style.display = 'block';
-    window.removeEventListener('afterprint', restore);
-  });
+  const mql = window.matchMedia('print');
+  function onPrintChange(e) {
+    if (!e.matches) {
+      document.getElementById('content').style.display = 'block';
+      mql.removeEventListener('change', onPrintChange);
+    }
+  }
+  mql.addEventListener('change', onPrintChange);
   window.print();
 }
 
