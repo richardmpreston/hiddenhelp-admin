@@ -775,21 +775,34 @@ async function generatePDFBytes(r) {
   gap();
 
   field('Household', household);
-  if (r.notes) field('Notes', r.notes);
   gap();
 
   write(curtains ? 'Curtains or poles required' : 'No curtains or poles required');
   gap();
 
   write('Items', bold);
+  gap(0.4);
+
+  const BORDER = rgb(0, 0, 0);
+
+  function tRow(text, isCatHeader) {
+    maybeNewPage();
+    const bY = y - 3;
+    page.drawRectangle({ x: M, y: bY, width: CW, height: LH, borderColor: BORDER, borderWidth: 0.5 });
+    page.drawText(text, { x: M + 4, y, font: isCatHeader ? bold : regular, size: FS, color: BLACK });
+    y -= LH;
+  }
+
   const catOrder = ['general', 'electrical', 'furniture'];
   const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture' };
   const grouped = {};
   for (const it of items) { if (!grouped[it.category]) grouped[it.category] = []; grouped[it.category].push(it); }
-  const presentCats = catOrder.filter(c => grouped[c]);
+  const presentCats = catOrder.filter(cat => grouped[cat]);
+  const multiCat = presentCats.length > 1;
+
   for (const cat of presentCats) {
-    if (presentCats.length > 1) { gap(0.4); write(catLabel[cat], bold, FS - 1); }
-    for (const it of grouped[cat]) write(`  ${it.quantity} x ${it.description}`);
+    if (multiCat) tRow(catLabel[cat], true);
+    for (const it of grouped[cat]) tRow(`${it.quantity} x ${it.description}`, false);
   }
 
   return pdfDoc.save(); // returns Uint8Array
