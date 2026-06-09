@@ -793,7 +793,7 @@ async function generatePDFBytes(r) {
     y -= LH;
   }
 
-  const catOrder = ['general', 'electrical', 'furniture'];
+  const catOrder = ['electrical', 'furniture', 'general'];
   const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture' };
   const grouped = {};
   for (const it of items) { if (!grouped[it.category]) grouped[it.category] = []; grouped[it.category].push(it); }
