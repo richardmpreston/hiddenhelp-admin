@@ -564,7 +564,7 @@ function render(r) {
   const items = (r.wishlist_items || []).sort((a, b) =>
     a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
 
-  const catOrder = ['general', 'electrical', 'furniture'];
+  const catOrder = ['electrical', 'furniture', 'general'];
   const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture' };
 
   if (items.length) {
