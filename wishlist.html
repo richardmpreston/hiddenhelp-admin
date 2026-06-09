@@ -365,14 +365,14 @@ html, body {
       <div class="doc-meta" id="doc-meta"></div>
     </div>
     <div class="top-bar-actions no-print">
-      <a href="index.html" class="btn">&#8592; Admin</a>
-      <button class="btn btn-print" onclick="printWishlist()">Print / Save PDF</button>
+      <button class="btn" onclick="window.close()">Close ✕</button>
     </div>
   </div>
 
   <div class="action-bar no-print">
     <button class="btn btn-tg"    id="btn-tg"    onclick="handlePostTelegram()">📤 Post to Telegram</button>
     <button class="btn btn-email" id="btn-email" onclick="handleEmailDraft()">✉️ Email Draft</button>
+    <button class="btn btn-print" onclick="printWishlist()">🖨️ Print / Save PDF</button>
     <span class="action-status" id="action-status"></span>
   </div>
 
