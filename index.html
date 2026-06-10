@@ -988,7 +988,29 @@ document.getElementById('search').addEventListener('input', e => {
 });
 
 // ── Detail ──────────────────────────────────────────────────
+function hasUnsavedChanges() {
+  if (!selectedRef) return false;
+  if (editingSection) return true;
+  const notes = document.getElementById('notes-area');
+  if (notes && notes.value !== (selectedRef.notes || '')) return true;
+  const reason = document.getElementById('cancel-reason');
+  if (reason && reason.value.trim()) return true;
+  const addr = document.getElementById('convert-address');
+  if (addr && addr.value.trim()) return true;
+  return false;
+}
+
+function confirmDiscard() {
+  return !hasUnsavedChanges() || confirm('You have unsaved changes — discard them?');
+}
+
+window.addEventListener('beforeunload', e => {
+  if (hasUnsavedChanges()) { e.preventDefault(); e.returnValue = ''; }
+});
+
 function selectReferral(r) {
+  if (r === selectedRef) return;
+  if (!confirmDiscard()) return;
   selectedRef     = r;
   editingSection  = null;
   showCancelForm  = false;
@@ -1251,7 +1273,7 @@ function renderDetail(r) {
       <div class="card">
         <div class="card-title">Admin notes</div>
         <textarea id="notes-area" class="notes-area" placeholder="Add a note…">${esc(r.notes || '')}</textarea>
-        <button class="notes-save" onclick="saveNotes(${r.id})">Save note</button>
+        <button id="notes-save-btn" class="notes-save" onclick="saveNotes(${r.id})">Save note</button>
       </div>
 
       ${actionsCard}
@@ -1374,7 +1396,7 @@ async function cancelReferral(id) {
 
 async function patchClient(clientId, fields) {
   const { error } = await db.from('clients').update(fields).eq('id', clientId);
-  if (error) { console.error('Client patch error:', error); return; }
+  if (error) { console.error('Client patch error:', error); alert('Save failed: ' + error.message); return; }
   allReferrals.forEach(r => {
     if (r.clients?.id === clientId) Object.assign(r.clients, fields);
   });
@@ -1403,11 +1425,26 @@ async function uncompleteReferral(id) {
 // ── Notes ───────────────────────────────────────────────────
 async function saveNotes(referralId) {
   const text = document.getElementById('notes-area')?.value || '';
+  const btn  = document.getElementById('notes-save-btn');
   const { error } = await db.from('referrals').update({ notes: text }).eq('id', referralId);
-  if (!error) {
-    const r = allReferrals.find(x => x.id === referralId);
-    if (r) r.notes = text;
+  if (error) {
+    console.error('Notes save error:', error);
+    flashButton(btn, '✕ Save failed', 'var(--red)', 'Save note');
+    return;
   }
+  const r = allReferrals.find(x => x.id === referralId);
+  if (r) r.notes = text;
+  flashButton(btn, '✓ Saved', 'var(--green)', 'Save note');
+}
+
+function flashButton(btn, text, color, originalText) {
+  if (!btn) return;
+  btn.textContent = text;
+  btn.style.background = color;
+  setTimeout(() => {
+    btn.textContent = originalText;
+    btn.style.background = '';
+  }, 2000);
 }
 
 // ── Wishlist link ────────────────────────────────────────────
@@ -1424,6 +1461,10 @@ function copyWishlistUrl(referralNumber) {
 
 // ── Refresh ─────────────────────────────────────────────────
 async function refreshSelected() {
+  if (!confirmDiscard()) return;
+  editingSection  = null;
+  showCancelForm  = false;
+  showConvertForm = false;
   await loadReferrals();
 }
 
