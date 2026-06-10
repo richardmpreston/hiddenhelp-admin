@@ -1277,12 +1277,19 @@ function toggleCancelForm() {
   showCancelForm  = !showCancelForm;
   showConvertForm = false;
   renderDetail(selectedRef);
+  if (showCancelForm) scrollActionsIntoView();
 }
 
 function toggleConvertForm() {
   showConvertForm = !showConvertForm;
   showCancelForm  = false;
   renderDetail(selectedRef);
+  if (showConvertForm) scrollActionsIntoView();
+}
+
+function scrollActionsIntoView() {
+  const card = document.querySelector('#detail .action-card');
+  if (card) card.scrollIntoView({ behavior: 'smooth', block: 'end' });
 }
 
 function fillMsNow(field) {
