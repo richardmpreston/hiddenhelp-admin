@@ -758,6 +758,7 @@ const WISHLIST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSej2Tb1f1qxZ
 let editingSection  = null;  // 'milestones' | 'payment' | null
 let showCancelForm  = false;
 let showConvertForm = false;
+let showWishlist    = false;
 let volunteers     = [];
 
 // ── Auth ────────────────────────────────────────────────────
@@ -992,6 +993,7 @@ function selectReferral(r) {
   editingSection  = null;
   showCancelForm  = false;
   showConvertForm = false;
+  showWishlist    = false;
   renderList();
   renderDetail(r);
 }
@@ -1230,13 +1232,16 @@ function renderDetail(r) {
 
       ${items.length ? `
       <div class="card">
-        <div class="card-title">Wishlist items (${items.length})</div>
-        ${items.map(it => `
+        <div class="card-title-row"${showWishlist ? '' : ' style="margin-bottom:0;"'}>
+          <div class="card-title">Wishlist items (${items.length})</div>
+          <button class="btn-edit-card${showWishlist ? ' active' : ''}" onclick="toggleWishlist()">${showWishlist ? 'Hide ▴' : 'Show ▾'}</button>
+        </div>
+        ${showWishlist ? items.map(it => `
           <div class="item-row">
             <span class="item-qty">×${it.quantity}</span>
             <span class="item-name">${esc(it.description)}</span>
             <span class="item-cat ic-${it.category}">${it.category}</span>
-          </div>`).join('')}
+          </div>`).join('') : ''}
       </div>` : `
       <div class="card">
         <div class="card-title">Wishlist items</div>
@@ -1278,6 +1283,11 @@ function toggleCancelForm() {
   showConvertForm = false;
   renderDetail(selectedRef);
   if (showCancelForm) scrollActionsIntoView();
+}
+
+function toggleWishlist() {
+  showWishlist = !showWishlist;
+  renderDetail(selectedRef);
 }
 
 function toggleConvertForm() {
