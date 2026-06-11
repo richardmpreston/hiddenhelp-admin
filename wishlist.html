@@ -423,8 +423,7 @@ async function printWishlist() {
   btn.textContent = 'Generating…';
   btn.disabled = true;
   try {
-    const bytes = await generatePDFBytes(referralData);
-    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const blob = await fetchPdfBlob(referralData);
     const url = URL.createObjectURL(blob);
     window.open(url, '_blank');
     setTimeout(() => URL.revokeObjectURL(url), 30000);
@@ -659,153 +658,25 @@ function buildHousehold(adultsCount, adultsBySex, childAges) {
   return parts.join(', ');
 }
 
-function hasCurtainsOrPoles(items) {
-  return items.some(it => /curtain|pole/i.test(it.description));
-}
+// ── PDF fetch (generated server-side by the post-to-telegram edge function
+//    with mode:'pdf', so Telegram, Print and Email all share one generator) ──
 
-function sortItems(items) {
-  return [...items].sort((a, b) =>
-    a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
-}
-
-// ── PDF generation (browser, uses pdf-lib global from CDN) ────
-
-async function ensurePdfLib() {
-  if (window.PDFLib) return;
-  await new Promise((resolve, reject) => {
-    const s = document.createElement('script');
-    s.src = 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js';
-    s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
+async function fetchPdfBlob(r) {
+  const { data: { session } } = await db.auth.getSession();
+  const res = await fetch(`${SUPABASE_URL}/functions/v1/post-to-telegram`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    },
+    body: JSON.stringify({ referral_number: r.referral_number, mode: 'pdf' }),
   });
-}
-
-async function generatePDFBytes(r) {
-  await ensurePdfLib();
-  const { PDFDocument, StandardFonts, rgb } = PDFLib;
-  const c = r.clients || {};
-  const ref = r.referrers || {};
-  const isDelivery = r.fulfilment_type === 'delivery';
-  const name = [c.first_name, c.last_name].filter(Boolean).join(' ');
-  const items = sortItems(r.wishlist_items || []);
-  const household = buildHousehold(r.adults_count, r.adults_by_sex, r.child_ages);
-  const curtains = hasCurtainsOrPoles(items);
-  const BLACK = rgb(0.11, 0.098, 0.086);
-
-  const pdfDoc = await PDFDocument.create();
-  const bold    = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
-  const regular = await pdfDoc.embedFont(StandardFonts.Helvetica);
-
-  const W = 595.28, H = 841.89, M = 50;
-  const CW = W - M * 2;
-  const FS = 10, HEAD_FS = 13, LH = 16;
-
-  let page = pdfDoc.addPage([W, H]);
-  let y = H - M;
-
-  function maybeNewPage() {
-    if (y < M + LH * 2) { page = pdfDoc.addPage([W, H]); y = H - M; }
+  if (!res.ok) {
+    let msg = `HTTP ${res.status}`;
+    try { msg = (await res.json()).error || msg; } catch (_) {}
+    throw new Error(msg);
   }
-
-  function wrap(text, f, size) {
-    const words = String(text).split(' ');
-    const out = []; let cur = '';
-    for (const w of words) {
-      const test = cur ? `${cur} ${w}` : w;
-      if (cur && f.widthOfTextAtSize(test, size) > CW) { out.push(cur); cur = w; }
-      else cur = test;
-    }
-    if (cur) out.push(cur);
-    return out.length ? out : [''];
-  }
-
-  function write(text, f, size) {
-    f = f || regular; size = size || FS;
-    for (const line of wrap(text, f, size)) {
-      maybeNewPage();
-      page.drawText(line, { x: M, y, font: f, size, color: BLACK });
-      y -= LH;
-    }
-  }
-
-  function field(label, value) {
-    if (!value) return;
-    const labelText = `${label}: `;
-    const lw = bold.widthOfTextAtSize(labelText, FS);
-    const valueLines = wrap(value, regular, FS);
-    maybeNewPage();
-    page.drawText(labelText, { x: M, y, font: bold, size: FS, color: BLACK });
-    if (lw + regular.widthOfTextAtSize(valueLines[0], FS) <= CW) {
-      page.drawText(valueLines[0], { x: M + lw, y, font: regular, size: FS, color: BLACK });
-      y -= LH;
-      for (let i = 1; i < valueLines.length; i++) {
-        maybeNewPage();
-        page.drawText(valueLines[i], { x: M + lw, y, font: regular, size: FS, color: BLACK });
-        y -= LH;
-      }
-    } else {
-      y -= LH;
-      for (const line of valueLines) {
-        maybeNewPage();
-        page.drawText(line, { x: M + 12, y, font: regular, size: FS, color: BLACK });
-        y -= LH;
-      }
-    }
-  }
-
-  function gap(n) { y -= LH * (n || 0.6); }
-
-  write('Hidden Help', bold, HEAD_FS);
-  write(`Referral ${r.referral_number} — ${isDelivery ? 'Delivery' : 'Collection'}`, regular, HEAD_FS);
-  gap();
-
-  field('Client', name);
-  field('Phone', fmtPhone(c.phone));
-  if (c.client_secondary_contact) field('Second contact', c.client_secondary_contact);
-  if (isDelivery) {
-    field('Address', c.geocoded_address || c.address);
-    field('Postcode', c.postcode);
-    if (c.geocode_partial) write('⚠ Partial address match — verify before delivery');
-  }
-  gap();
-
-  const refPhone = fmtPhone(ref.phone);
-  const refDetail = [refPhone, ref.organisation].filter(Boolean).join(', ');
-  field('Referrer', `${ref.name || ''}${refDetail ? ` (${refDetail})` : ''}`);
-  gap();
-
-  field('Household', household);
-  gap();
-
-  write(curtains ? 'Curtains or poles required' : 'No curtains or poles required');
-  gap();
-
-  write('Items', bold);
-  gap(0.4);
-
-  const BORDER = rgb(0, 0, 0);
-
-  function tRow(text, isCatHeader) {
-    maybeNewPage();
-    const bY = y - 3;
-    page.drawRectangle({ x: M, y: bY, width: CW, height: LH, borderColor: BORDER, borderWidth: 0.5 });
-    page.drawText(text, { x: M + 4, y, font: isCatHeader ? bold : regular, size: FS, color: BLACK });
-    y -= LH;
-  }
-
-  const catOrder = ['electrical', 'furniture', 'general'];
-  const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture' };
-  const grouped = {};
-  for (const it of items) { if (!grouped[it.category]) grouped[it.category] = []; grouped[it.category].push(it); }
-  const presentCats = catOrder.filter(cat => grouped[cat]);
-  const multiCat = presentCats.length > 1;
-
-  for (const cat of presentCats) {
-    if (multiCat) tRow(catLabel[cat], true);
-    for (const it of grouped[cat]) tRow(`${it.quantity} x ${it.description}`, false);
-  }
-
-  return pdfDoc.save(); // returns Uint8Array
+  return res.blob();
 }
 
 // ── Post to Telegram ──────────────────────────────────────────
@@ -868,8 +739,7 @@ async function handleEmailDraft() {
   setActionBusy(true);
   setActionStatus('Generating PDF…');
   try {
-    const pdfBytes  = await generatePDFBytes(referralData);
-    const blob      = new Blob([pdfBytes], { type: 'application/pdf' });
+    const blob      = await fetchPdfBlob(referralData);
     const blobUrl   = URL.createObjectURL(blob);
     const filename  = `Referral ${referralData.referral_number}.pdf`;
 
