@@ -902,6 +902,7 @@ function filterReferrals() {
       r.clients?.first_name, r.clients?.last_name,
       r.referrers?.name, r.referrers?.organisation,
       r.clients?.postcode,
+      r.clients?.address, r.clients?.geocoded_address,
     ].filter(Boolean).some(v => v.toLowerCase().includes(q));
 
     return matchesFilter && matchesSearch;
