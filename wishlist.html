@@ -275,6 +275,7 @@ html, body {
 .cat-general    { background: var(--blue-bg);  color: var(--blue); }
 .cat-electrical { background: var(--amber-bg); color: var(--amber); }
 .cat-furniture  { background: var(--green-bg); color: var(--green); }
+.cat-other      { background: var(--blue-bg);  color: var(--blue); font-style: italic; }
 
 /* ── Notes ─────────────────────────────────────────────────── */
 .notes-text {
@@ -559,12 +560,12 @@ function render(r) {
 
   document.getElementById('info-cols').innerHTML = clientCard + rightCard;
 
-  // Items
+  // Items — free-text rows have category null; group them under 'other', last
   const items = (r.wishlist_items || []).sort((a, b) =>
-    a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
+    (a.category || '~').localeCompare(b.category || '~') || a.description.localeCompare(b.description));
 
-  const catOrder = ['electrical', 'furniture', 'general'];
-  const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture' };
+  const catOrder = ['electrical', 'furniture', 'general', 'other'];
+  const catLabel = { general: 'General', electrical: 'Electrical', furniture: 'Furniture', other: 'Other requests' };
 
   if (items.length) {
     document.getElementById('items-title').textContent = `Wishlist items (${items.length})`;
@@ -573,8 +574,9 @@ function render(r) {
 
     const grouped = {};
     for (const it of items) {
-      if (!grouped[it.category]) grouped[it.category] = [];
-      grouped[it.category].push(it);
+      const cat = it.category || 'other';
+      if (!grouped[cat]) grouped[cat] = [];
+      grouped[cat].push(it);
     }
 
     const tbody = document.getElementById('items-body');

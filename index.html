@@ -412,6 +412,7 @@ a { color: inherit; text-decoration: none; }
 .item-name { font-size: 13px; flex: 1; }
 .item-cat  { font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: 99px; }
 .ic-general    { background: var(--bg2); color: var(--text2); }
+.ic-other      { background: var(--bg2); color: var(--text3); font-style: italic; }
 .ic-furniture  { background: var(--purple-bg); color: var(--purple); }
 .ic-electrical { background: var(--amber-bg); color: var(--amber); }
 
@@ -1028,7 +1029,9 @@ function renderDetail(r) {
   const ref    = r.referrers || {};
   const name   = [client.first_name, client.last_name].filter(Boolean).join(' ') || '—';
   const crises = crisisNames(r);
-  const items  = (r.wishlist_items || []).sort((a,b) => a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
+  // free-text wishlist rows have category null — sort them last
+  const items  = (r.wishlist_items || []).sort((a,b) =>
+    (a.category || '~').localeCompare(b.category || '~') || a.description.localeCompare(b.description));
 
   const mapsUrl = (client.latitude && client.longitude)
     ? `https://www.google.com/maps?q=${client.latitude},${client.longitude}`
@@ -1263,7 +1266,7 @@ function renderDetail(r) {
           <div class="item-row">
             <span class="item-qty">×${it.quantity}</span>
             <span class="item-name">${esc(it.description)}</span>
-            <span class="item-cat ic-${it.category}">${it.category}</span>
+            <span class="item-cat ic-${it.category || 'other'}">${it.category || 'free text'}</span>
           </div>`).join('') : ''}
       </div>` : `
       <div class="card">
