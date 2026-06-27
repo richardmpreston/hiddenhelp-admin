@@ -211,6 +211,13 @@ a { color: inherit; text-decoration: none; }
   color: var(--accent);
   font-weight: 500;
 }
+.pill-count {
+  display: inline-block;
+  margin-left: 4px;
+  font-size: 10px;
+  opacity: 0.6;
+  font-weight: 400;
+}
 .ref-list {
   flex: 1;
   overflow-y: auto;
@@ -859,6 +866,7 @@ async function loadReferrals() {
 
   if (error) { console.error(error); return; }
   allReferrals = data || [];
+  updatePillCounts();
   if (selectedRef) {
     const updated = allReferrals.find(x => x.id === selectedRef.id);
     if (updated) { selectedRef = updated; renderDetail(selectedRef); }
@@ -995,6 +1003,29 @@ function fmtPhone(s) {
   // Convert +447... → 07...
   const n = String(s).replace(/^\+44/, '0');
   return esc(n);
+}
+
+// ── Pill counts ─────────────────────────────────────────────
+function updatePillCounts() {
+  const counts = { all: 0, active: 0, delivery: 0, collection: 0,
+                   'awaiting-wishlist': 0, completed: 0, cancelled: 0 };
+  allReferrals.forEach(r => {
+    const status = deriveStatus(r);
+    counts.all++;
+    if (!['completed','cancelled'].includes(status)) counts.active++;
+    if (r.fulfilment_type === 'delivery')   counts.delivery++;
+    if (r.fulfilment_type === 'collection') counts.collection++;
+    if (status === 'awaiting wishlist') counts['awaiting-wishlist']++;
+    if (status === 'completed') counts.completed++;
+    if (status === 'cancelled') counts.cancelled++;
+  });
+  document.querySelectorAll('.pill[data-filter]').forEach(btn => {
+    const key = btn.dataset.filter;
+    const label = btn.dataset.label || btn.firstChild.textContent.trim();
+    btn.dataset.label = label;  // cache on first run
+    const n = counts[key] ?? '';
+    btn.innerHTML = label + (n !== '' ? `<span class="pill-count">: ${n}</span>` : '');
+  });
 }
 
 // ── Filters ─────────────────────────────────────────────────
@@ -1504,6 +1535,7 @@ async function deleteReferral(id) {
   const { error } = await db.from('referrals').delete().eq('id', id);
   if (error) { alert('Delete failed: ' + error.message); return; }
   allReferrals = allReferrals.filter(x => x.id !== id);
+  updatePillCounts();
   selectedRef  = null;
   document.getElementById('detail').innerHTML = '';
   renderList();
