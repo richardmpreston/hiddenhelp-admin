@@ -355,6 +355,7 @@ a { color: inherit; text-decoration: none; }
 
 /* ── Cards ─────────────────────────────────────────────────── */
 .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
 .card {
   background: var(--panel);
   border: 1px solid var(--border);
@@ -719,6 +720,7 @@ a { color: inherit; text-decoration: none; }
   }
   .detail { min-height: 50vh; }
   .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
   .stat-row { grid-template-columns: 1fr 1fr; }
   .detail-header { flex-direction: column; gap: 10px; }
   .detail-actions { width: 100%; justify-content: flex-end; }
@@ -1093,9 +1095,13 @@ function renderDetail(r) {
   const ref    = r.referrers || {};
   const name   = [client.first_name, client.last_name].filter(Boolean).join(' ') || '—';
   const crises = crisisNames(r);
-  // free-text wishlist rows have category null — sort them last
-  const items  = (r.wishlist_items || []).sort((a,b) =>
-    (a.category || '~').localeCompare(b.category || '~') || a.description.localeCompare(b.description));
+  // wishlist_items with null category are free-text (form column EP), not real items —
+  // keep them out of the wishlist list and fold them into the referrer notes instead
+  const items  = (r.wishlist_items || []).filter(it => it.category)
+    .sort((a,b) => a.category.localeCompare(b.category) || a.description.localeCompare(b.description));
+  const wishFreeText = (r.wishlist_items || []).filter(it => !it.category)
+    .map(it => it.description).join('\n');
+  const referrerNotes = [r.referrer_notes, wishFreeText].filter(Boolean).join('\n');
 
   const mapsUrl = (client.latitude && client.longitude)
     ? `https://www.google.com/maps?q=${client.latitude},${client.longitude}`
@@ -1272,7 +1278,7 @@ function renderDetail(r) {
         <div class="stat"><label>Children</label><span>${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
       </div>
 
-      <div class="two-col">
+      <div class="three-col">
         <div class="card">
           <div class="card-title">Client</div>
           <div class="field">
@@ -1296,20 +1302,20 @@ function renderDetail(r) {
             ${client.geocoded_address ? esc(client.geocoded_address).replace(/, /g,'<br>') : (client.address ? esc(client.address) : '<span style="color:var(--text3)">No address recorded</span>')}
             ${client.geocode_partial ? '<div class="address-note">⚠️ Partial match — verify before delivery</div>' : ''}
           </div>
-          <div class="field"><label>Referrer</label><span>${esc(ref.name || '—')}${ref.phone ? ' · ' + fmtPhone(ref.phone) : ''}</span></div>
-          <div class="field"><label>Organisation</label><span>${esc(ref.organisation || '—')}</span></div>
-          ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-          ${r.referrer_notes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(r.referrer_notes)}</span></div>` : ''}
         </div>` : `
+        <div class="card">
+          <div class="card-title">Collection instructions</div>
+          ${r.collection_instructions ? `<div class="address-box" style="white-space:pre-wrap">${esc(r.collection_instructions)}</div>` : '<div style="font-size:13px;color:var(--text3)">None recorded</div>'}
+        </div>`}
+
         <div class="card">
           <div class="card-title">Referrer</div>
           <div class="field"><label>Name</label><span>${esc(ref.name || '—')}</span></div>
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
           ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
-          ${r.collection_instructions ? `<div class="field"><label>Collection instructions</label><span style="white-space:pre-wrap">${esc(r.collection_instructions)}</span></div>` : ''}
-          ${r.referrer_notes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(r.referrer_notes)}</span></div>` : ''}
-        </div>`}
+          ${referrerNotes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(referrerNotes)}</span></div>` : ''}
+        </div>
       </div>
 
       <div class="two-col">
