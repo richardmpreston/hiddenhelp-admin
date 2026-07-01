@@ -274,6 +274,7 @@ a { color: inherit; text-decoration: none; }
 .tag-gathered   { background: var(--purple-bg); color: var(--purple); }
 .tag-completed  { background: var(--green-bg);  color: var(--green); }
 .tag-cancelled  { background: var(--red-bg);    color: var(--red); }
+.tag-rejected   { background: var(--bg3);        color: var(--text2); }
 .tag-crisis     { background: var(--bg2);        color: var(--text2); }
 .tag-vuln       { background: var(--red-bg);    color: var(--red); }
 
@@ -775,6 +776,7 @@ a { color: inherit; text-decoration: none; }
           <button class="pill" data-filter="awaiting-wishlist">Awaiting wishlist</button>
           <button class="pill" data-filter="completed">Completed</button>
           <button class="pill" data-filter="cancelled">Cancelled</button>
+          <button class="pill" data-filter="rejected">Rejected</button>
         </div>
       </div>
       <div id="ref-list" class="ref-list">
@@ -807,6 +809,7 @@ const WISHLIST_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSej2Tb1f1qxZ
 let editingSection  = null;  // 'milestones' | 'payment' | null
 let editingRefNum   = false;
 let showCancelForm  = false;
+let cancelFormType  = 'cancelled';  // 'cancelled' | 'rejected'
 let showConvertForm = false;
 let showWishlist    = false;
 let volunteers     = [];
@@ -893,7 +896,7 @@ async function loadVolunteers() {
 }
 
 function deriveStatus(r) {
-  if (r.cancelled_at)          return 'cancelled';
+  if (r.cancelled_at)          return r.cancellation_type === 'rejected' ? 'rejected' : 'cancelled';
   if (r.completed_at)          return 'completed';
   if (r.gathered_at)           return 'gathered';
   if (r.wishlist_submitted_at) return 'awaiting gathering';
@@ -940,12 +943,13 @@ function filterReferrals() {
     const q = searchQuery.toLowerCase();
 
     const matchesFilter = activeFilter === 'all'      ? true
-      : activeFilter === 'active'    ? !['completed','cancelled'].includes(status)
+      : activeFilter === 'active'    ? !['completed','cancelled','rejected'].includes(status)
       : activeFilter === 'delivery'   ? r.fulfilment_type === 'delivery'
       : activeFilter === 'collection' ? r.fulfilment_type === 'collection'
       : activeFilter === 'awaiting-wishlist' ? status === 'awaiting wishlist'
       : activeFilter === 'completed' ? status === 'completed'
       : activeFilter === 'cancelled' ? status === 'cancelled'
+      : activeFilter === 'rejected' ? status === 'rejected'
       : true;
 
     const matchesSearch = !q || [
@@ -1000,11 +1004,11 @@ function renderList() {
 }
 
 function statusKey(s) {
-  return { 'completed': 'completed', 'cancelled': 'cancelled', 'gathered': 'gathered',
+  return { 'completed': 'completed', 'cancelled': 'cancelled', 'rejected': 'rejected', 'gathered': 'gathered',
            'awaiting gathering': 'gathered', 'awaiting wishlist': 'wishlist', 'new': 'new' }[s] || 'new';
 }
 function statusLabel(s) {
-  return { 'completed': 'Completed', 'cancelled': 'Cancelled', 'gathered': 'Gathered',
+  return { 'completed': 'Completed', 'cancelled': 'Cancelled', 'rejected': 'Rejected', 'gathered': 'Gathered',
            'awaiting gathering': 'Awaiting gathering', 'awaiting wishlist': 'Awaiting wishlist', 'new': 'New' }[s] || s;
 }
 function esc(s) {
@@ -1028,16 +1032,17 @@ function fmtPhone(s) {
 // ── Pill counts ─────────────────────────────────────────────
 function updatePillCounts() {
   const counts = { all: 0, active: 0, delivery: 0, collection: 0,
-                   'awaiting-wishlist': 0, completed: 0, cancelled: 0 };
+                   'awaiting-wishlist': 0, completed: 0, cancelled: 0, rejected: 0 };
   allReferrals.forEach(r => {
     const status = deriveStatus(r);
     counts.all++;
-    if (!['completed','cancelled'].includes(status)) counts.active++;
+    if (!['completed','cancelled','rejected'].includes(status)) counts.active++;
     if (r.fulfilment_type === 'delivery')   counts.delivery++;
     if (r.fulfilment_type === 'collection') counts.collection++;
     if (status === 'awaiting wishlist') counts['awaiting-wishlist']++;
     if (status === 'completed') counts.completed++;
     if (status === 'cancelled') counts.cancelled++;
+    if (status === 'rejected') counts.rejected++;
   });
   document.querySelectorAll('.pill[data-filter]').forEach(btn => {
     const key = btn.dataset.filter;
@@ -1218,10 +1223,10 @@ function renderDetail(r) {
     <div class="action-card">
       <div class="action-card-title">Actions</div>
       ${showCancelForm ? `
-        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;">Cancellation reason (optional)</div>
-        <textarea id="cancel-reason" class="cancel-reason-area" placeholder="e.g. Client no longer needs help…"></textarea>
+        <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:4px;">${cancelFormType === 'rejected' ? 'Rejection reason (optional)' : 'Cancellation reason (optional)'}</div>
+        <textarea id="cancel-reason" class="cancel-reason-area" placeholder="${cancelFormType === 'rejected' ? "e.g. Doesn't meet eligibility criteria…" : 'e.g. Client no longer needs help…'}"></textarea>
         <div class="edit-actions">
-          <button class="btn-confirm-cancel" onclick="cancelReferral(${r.id})">Confirm cancel</button>
+          <button class="btn-confirm-cancel" onclick="cancelReferral(${r.id})">${cancelFormType === 'rejected' ? 'Confirm reject' : 'Confirm cancel'}</button>
           <button class="btn-cancel-edit" onclick="toggleCancelForm()">Back</button>
         </div>
       ` : showConvertForm ? `
@@ -1252,9 +1257,10 @@ function renderDetail(r) {
         </div>
       ` : `
         <div class="action-buttons">
-          ${!r.cancelled_at ? `<button class="btn-do-cancel" onclick="toggleCancelForm()">Cancel referral</button>` : ''}
+          ${!r.cancelled_at ? `<button class="btn-do-cancel" onclick="toggleCancelForm('rejected')">Reject referral</button>` : ''}
+          ${!r.cancelled_at ? `<button class="btn-do-cancel" onclick="toggleCancelForm('cancelled')">Cancel referral</button>` : ''}
           ${r.fulfilment_type === 'collection' && !r.cancelled_at ? `<button class="btn-do-convert" onclick="toggleConvertForm()">Convert to delivery</button>` : ''}
-          ${(r.completed_at || r.cancelled_at) ? `<button class="btn-do-uncomplete" onclick="uncompleteReferral(${r.id})">${r.cancelled_at ? 'Uncancel' : 'Unmark as completed'}</button>` : ''}
+          ${(r.completed_at || r.cancelled_at) ? `<button class="btn-do-uncomplete" onclick="uncompleteReferral(${r.id})">${r.cancelled_at ? (r.cancellation_type === 'rejected' ? 'Unreject' : 'Uncancel') : 'Unmark as completed'}</button>` : ''}
           ${(!r.cancelled_at && !r.completed_at) ? `<span style="font-size:12px;color:var(--text3)">Mark gathered/completed via Telegram bot, or use milestone edit above.</span>` : ''}
           ${r.cancelled_at ? `<button class="btn-do-delete" onclick="deleteReferral(${r.id})">Delete referral</button>` : ''}
         </div>
@@ -1285,7 +1291,7 @@ function renderDetail(r) {
     </div>
     <div class="detail-body">
 
-      ${r.cancelled_at ? `<div class="cancelled-banner">⚠️ Cancelled${r.cancellation_reason ? ' · ' + esc(r.cancellation_reason) : ''}</div>` : ''}
+      ${r.cancelled_at ? `<div class="cancelled-banner">⚠️ ${r.cancellation_type === 'rejected' ? 'Rejected' : 'Cancelled'}${r.cancellation_reason ? ' · ' + esc(r.cancellation_reason) : ''}</div>` : ''}
 
       <div class="stat-row">
         <div class="stat"><label>Type</label><span>${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span></div>
@@ -1400,8 +1406,9 @@ function toggleEdit(section) {
   renderDetail(selectedRef);
 }
 
-function toggleCancelForm() {
+function toggleCancelForm(type = 'cancelled') {
   showCancelForm  = !showCancelForm;
+  cancelFormType  = type;
   showConvertForm = false;
   renderDetail(selectedRef);
   if (showCancelForm) scrollActionsIntoView();
@@ -1509,10 +1516,12 @@ async function savePayment(id) {
 
 async function cancelReferral(id) {
   const reason = document.getElementById('cancel-reason')?.value?.trim() || null;
+  const type   = cancelFormType;
   showCancelForm = false;
   await patchReferral(id, {
     cancelled_at:        new Date().toISOString(),
     cancellation_reason: reason,
+    cancellation_type:   type,
     completed_at:        null,
   });
 }
@@ -1542,13 +1551,14 @@ async function uncompleteReferral(id) {
     completed_at:        null,
     cancelled_at:        null,
     cancellation_reason: null,
+    cancellation_type:   null,
   });
 }
 
 async function deleteReferral(id) {
   const r = allReferrals.find(x => x.id === id);
   if (!r) return;
-  if (!r.cancelled_at) { alert('Only cancelled referrals can be deleted.'); return; }
+  if (!r.cancelled_at) { alert('Only cancelled or rejected referrals can be deleted.'); return; }
   const name = clientName(r.clients);
   const rn   = r.referral_number;
   if (!confirm(`Permanently delete referral #${rn} (${name})?\n\nThis will remove all associated wishlist items and cannot be undone.`)) return;
