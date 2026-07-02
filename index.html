@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hidden Help</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Sora+Mono&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
@@ -34,14 +34,12 @@
   --radius:    8px;
   --radius-sm: 5px;
   --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  --font:      'IBM Plex Sans', sans-serif;
-  --font-num:  'IBM Plex Mono', monospace;
+  --font:      'Sora', sans-serif;
   --sidebar-w: 280px;
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-.num, .ref-num, .ref-date, .ms-date { font-family: var(--font-num); font-feature-settings: "tnum" 1; }
 html, body { height: 100%; font-family: var(--font); font-size: 14px; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
 button { font-family: var(--font); cursor: pointer; border: none; background: none; }
 input, textarea, select { font-family: var(--font); }
@@ -1295,13 +1293,13 @@ function renderDetail(r) {
         <button class="btn-save-edit" onclick="saveRefNum(${r.id})" style="padding:3px 10px">✓</button>
         <button class="btn-cancel-edit" onclick="toggleEditRefNum()" style="padding:3px 8px">✕</button>
       </span>`
-    : `<span class="num">#${r.referral_number}</span><button class="btn-edit-refnum" onclick="toggleEditRefNum()" title="Edit referral number">${ICONS.pencil}</button>`;
+    : `#${r.referral_number}<button class="btn-edit-refnum" onclick="toggleEditRefNum()" title="Edit referral number">${ICONS.pencil}</button>`;
 
   panel.innerHTML = `
     <div class="detail-header">
       <div class="detail-header-left">
         <h2>${esc(name)} — ${refNumDisplay}</h2>
-        <p>${esc(ref.organisation || ref.name || '')}${ref.name && ref.organisation ? ' · ' + esc(ref.name) : ''} · referred <span class="num">${fmtDate(r.received_at || r.created_at)}</span></p>
+        <p>${esc(ref.organisation || ref.name || '')}${ref.name && ref.organisation ? ' · ' + esc(ref.name) : ''} · referred ${fmtDate(r.received_at || r.created_at)}</p>
       </div>
       <div class="detail-actions">
         ${!r.wishlist_submitted_at && !r.cancelled_at ? `<button class="btn" id="wishlist-link-btn" onclick="copyWishlistUrl(${r.referral_number})">${ICONS.copy}<span>Copy wishlist link</span></button>` : ''}
@@ -1317,8 +1315,8 @@ function renderDetail(r) {
       <div class="stat-row">
         <div class="stat"><label>Type</label><span>${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span></div>
         <div class="stat"><label>Status</label><span class="stat-${statusKey(status)}">${statusLabel(status)}</span></div>
-        <div class="stat"><label>Adults</label><span class="num">${r.adults_count ?? '—'}${r.adults_by_sex ? ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (r.adults_by_sex.male ? r.adults_by_sex.male + 'M' : '') + (r.adults_by_sex.male && r.adults_by_sex.female ? '/' : '') + (r.adults_by_sex.female ? r.adults_by_sex.female + 'F' : '') + ')</span>' : ''}</span></div>
-        <div class="stat"><label>Children</label><span class="num">${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
+        <div class="stat"><label>Adults</label><span>${r.adults_count ?? '—'}${r.adults_by_sex ? ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (r.adults_by_sex.male ? r.adults_by_sex.male + 'M' : '') + (r.adults_by_sex.male && r.adults_by_sex.female ? '/' : '') + (r.adults_by_sex.female ? r.adults_by_sex.female + 'F' : '') + ')</span>' : ''}</span></div>
+        <div class="stat"><label>Children</label><span>${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
       </div>
 
       ${(!r.cancelled_at && !r.completed_at) ? `<div style="font-size:12px;color:var(--text3);margin-top:-6px;">Mark gathered/completed via Telegram bot, or use the milestone edit below.</div>` : ''}
@@ -1330,9 +1328,9 @@ function renderDetail(r) {
             <label>Name</label>
             <span>${esc(name)}${client.vulnerable ? ' <span class="tag tag-vuln" style="margin-left:6px">Vulnerable</span>' : ''}</span>
           </div>
-          ${client.phone ? `<div class="field"><label>Phone</label><span class="num">${fmtPhone(client.phone)}</span></div>` : ''}
+          ${client.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(client.phone)}</span></div>` : ''}
           ${client.client_secondary_contact ? `<div class="field"><label>Secondary contact</label><span>${esc(client.client_secondary_contact)}</span></div>` : ''}
-          ${client.postcode ? `<div class="field"><label>Postcode</label><span class="num">${esc(client.postcode)}</span></div>` : ''}
+          ${client.postcode ? `<div class="field"><label>Postcode</label><span>${esc(client.postcode)}</span></div>` : ''}
           ${r.can_help_lift !== null ? `<div class="field"><label>Can help lift</label><span style="color:${r.can_help_lift ? 'var(--green)' : 'var(--red)'}">${r.can_help_lift ? 'Yes' : 'No'}</span></div>` : ''}
           ${crises.length ? `<div class="field"><label>Crisis</label><span>${crises.map(esc).join(', ')}</span></div>` : ''}
           ${r.crisis_other_detail ? `<div class="field"><label>Crisis detail</label><span>${esc(r.crisis_other_detail)}</span></div>` : ''}
@@ -1357,7 +1355,7 @@ function renderDetail(r) {
           <div class="card-title">Referrer</div>
           <div class="field"><label>Name</label><span>${esc(ref.name || '—')}</span></div>
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
-          ${ref.phone ? `<div class="field"><label>Phone</label><span class="num">${fmtPhone(ref.phone)}</span></div>` : ''}
+          ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
           ${referrerNotes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(referrerNotes)}</span></div>` : ''}
         </div>
