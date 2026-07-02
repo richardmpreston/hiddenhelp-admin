@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Hidden Help</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600&family=Sora+Mono&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="config.js"></script>
 <style>
@@ -34,12 +34,14 @@
   --radius:    8px;
   --radius-sm: 5px;
   --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  --font:      'Sora', sans-serif;
+  --font:      'IBM Plex Sans', sans-serif;
+  --font-num:  'IBM Plex Mono', monospace;
   --sidebar-w: 280px;
 }
 
 /* ── Reset ─────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+.num, .ref-num, .ref-date, .ms-date { font-family: var(--font-num); font-feature-settings: "tnum" 1; }
 html, body { height: 100%; font-family: var(--font); font-size: 14px; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
 button { font-family: var(--font); cursor: pointer; border: none; background: none; }
 input, textarea, select { font-family: var(--font); }
@@ -321,7 +323,11 @@ a { color: inherit; text-decoration: none; }
   color: var(--text);
   transition: background .12s;
   white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
+.btn svg { flex-shrink: 0; }
 .btn:hover { background: var(--bg2); }
 .btn-maps { background: var(--blue-bg); border-color: #B5CEFF; color: var(--blue); }
 .btn-maps:hover { background: #D8E8FF; }
@@ -488,6 +494,7 @@ a { color: inherit; text-decoration: none; }
   vertical-align: middle;
   margin-left: 5px;
 }
+.btn-edit-refnum { display: inline-flex; align-items: center; }
 .btn-edit-refnum:hover { color: var(--accent); border-color: var(--accent); }
 
 /* ── Edit controls ─────────────────────────────────────────── */
@@ -705,7 +712,11 @@ a { color: inherit; text-decoration: none; }
   font-size: 12px;
   color: var(--red);
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
+.cancelled-banner svg { flex-shrink: 0; }
 
 /* ── Loading ───────────────────────────────────────────────── */
 .loading {
@@ -813,6 +824,17 @@ let cancelFormType  = 'cancelled';  // 'cancelled' | 'rejected'
 let showConvertForm = false;
 let showWishlist    = false;
 let volunteers     = [];
+
+// ── Icons (monoline SVG, inherit button text colour) ────────
+const ICONS = {
+  copy:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="8.5" y="8.5" width="12" height="12.5" rx="2"/><path d="M16 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h2.5"/></svg>',
+  check:   '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>',
+  list:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><line x1="9" y1="6" x2="20" y2="6"/><line x1="9" y1="12" x2="20" y2="12"/><line x1="9" y1="18" x2="20" y2="18"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
+  map:     '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10.5c0 5.5-8 11-8 11s-8-5.5-8-11a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10.5" r="2.8"/></svg>',
+  refresh: '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-2.6-6.4"/><path d="M21 3.5v6h-6"/></svg>',
+  pencil:  '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>',
+  warn:    '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><line x1="12" y1="9" x2="12" y2="13.5"/><line x1="12" y1="17.5" x2="12.01" y2="17.5"/></svg>',
+};
 
 // ── Auth ────────────────────────────────────────────────────
 async function initAuth() {
@@ -1273,30 +1295,30 @@ function renderDetail(r) {
         <button class="btn-save-edit" onclick="saveRefNum(${r.id})" style="padding:3px 10px">✓</button>
         <button class="btn-cancel-edit" onclick="toggleEditRefNum()" style="padding:3px 8px">✕</button>
       </span>`
-    : `#${r.referral_number}<button class="btn-edit-refnum" onclick="toggleEditRefNum()" title="Edit referral number">✎</button>`;
+    : `<span class="num">#${r.referral_number}</span><button class="btn-edit-refnum" onclick="toggleEditRefNum()" title="Edit referral number">${ICONS.pencil}</button>`;
 
   panel.innerHTML = `
     <div class="detail-header">
       <div class="detail-header-left">
         <h2>${esc(name)} — ${refNumDisplay}</h2>
-        <p>${esc(ref.organisation || ref.name || '')}${ref.name && ref.organisation ? ' · ' + esc(ref.name) : ''} · referred ${fmtDate(r.received_at || r.created_at)}</p>
+        <p>${esc(ref.organisation || ref.name || '')}${ref.name && ref.organisation ? ' · ' + esc(ref.name) : ''} · referred <span class="num">${fmtDate(r.received_at || r.created_at)}</span></p>
       </div>
       <div class="detail-actions">
-        ${!r.wishlist_submitted_at && !r.cancelled_at ? `<button class="btn" id="wishlist-link-btn" onclick="copyWishlistUrl(${r.referral_number})">📋 Copy wishlist link</button>` : ''}
-        ${r.wishlist_submitted_at ? `<a href="wishlist.html?ref=${r.referral_number}" target="_blank" class="btn">🗒 Wishlist</a>` : ''}
-        ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-maps">📍 Maps</a>` : ''}
-        <button class="btn" onclick="refreshSelected()">↻ Refresh</button>
+        ${!r.wishlist_submitted_at && !r.cancelled_at ? `<button class="btn" id="wishlist-link-btn" onclick="copyWishlistUrl(${r.referral_number})">${ICONS.copy}<span>Copy wishlist link</span></button>` : ''}
+        ${r.wishlist_submitted_at ? `<a href="wishlist.html?ref=${r.referral_number}" target="_blank" class="btn">${ICONS.list}<span>Wishlist</span></a>` : ''}
+        ${mapsUrl ? `<a href="${mapsUrl}" target="_blank" class="btn btn-maps">${ICONS.map}<span>Maps</span></a>` : ''}
+        <button class="btn" onclick="refreshSelected()">${ICONS.refresh}<span>Refresh</span></button>
       </div>
     </div>
     <div class="detail-body">
 
-      ${r.cancelled_at ? `<div class="cancelled-banner">⚠️ ${r.cancellation_type === 'rejected' ? 'Rejected' : 'Cancelled'}${r.cancellation_reason ? ' · ' + esc(r.cancellation_reason) : ''}</div>` : ''}
+      ${r.cancelled_at ? `<div class="cancelled-banner">${ICONS.warn}<span>${r.cancellation_type === 'rejected' ? 'Rejected' : 'Cancelled'}${r.cancellation_reason ? ' · ' + esc(r.cancellation_reason) : ''}</span></div>` : ''}
 
       <div class="stat-row">
         <div class="stat"><label>Type</label><span>${r.fulfilment_type.charAt(0).toUpperCase() + r.fulfilment_type.slice(1)}</span></div>
         <div class="stat"><label>Status</label><span class="stat-${statusKey(status)}">${statusLabel(status)}</span></div>
-        <div class="stat"><label>Adults</label><span>${r.adults_count ?? '—'}${r.adults_by_sex ? ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (r.adults_by_sex.male ? r.adults_by_sex.male + 'M' : '') + (r.adults_by_sex.male && r.adults_by_sex.female ? '/' : '') + (r.adults_by_sex.female ? r.adults_by_sex.female + 'F' : '') + ')</span>' : ''}</span></div>
-        <div class="stat"><label>Children</label><span>${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
+        <div class="stat"><label>Adults</label><span class="num">${r.adults_count ?? '—'}${r.adults_by_sex ? ' <span style="font-size:11px;font-weight:400;color:var(--text3)">(' + (r.adults_by_sex.male ? r.adults_by_sex.male + 'M' : '') + (r.adults_by_sex.male && r.adults_by_sex.female ? '/' : '') + (r.adults_by_sex.female ? r.adults_by_sex.female + 'F' : '') + ')</span>' : ''}</span></div>
+        <div class="stat"><label>Children</label><span class="num">${r.children_count ?? (r.child_ages ? Object.values(r.child_ages).reduce((a,b) => a+b, 0) : '—')}</span></div>
       </div>
 
       ${(!r.cancelled_at && !r.completed_at) ? `<div style="font-size:12px;color:var(--text3);margin-top:-6px;">Mark gathered/completed via Telegram bot, or use the milestone edit below.</div>` : ''}
@@ -1308,9 +1330,9 @@ function renderDetail(r) {
             <label>Name</label>
             <span>${esc(name)}${client.vulnerable ? ' <span class="tag tag-vuln" style="margin-left:6px">Vulnerable</span>' : ''}</span>
           </div>
-          ${client.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(client.phone)}</span></div>` : ''}
+          ${client.phone ? `<div class="field"><label>Phone</label><span class="num">${fmtPhone(client.phone)}</span></div>` : ''}
           ${client.client_secondary_contact ? `<div class="field"><label>Secondary contact</label><span>${esc(client.client_secondary_contact)}</span></div>` : ''}
-          ${client.postcode ? `<div class="field"><label>Postcode</label><span>${esc(client.postcode)}</span></div>` : ''}
+          ${client.postcode ? `<div class="field"><label>Postcode</label><span class="num">${esc(client.postcode)}</span></div>` : ''}
           ${r.can_help_lift !== null ? `<div class="field"><label>Can help lift</label><span style="color:${r.can_help_lift ? 'var(--green)' : 'var(--red)'}">${r.can_help_lift ? 'Yes' : 'No'}</span></div>` : ''}
           ${crises.length ? `<div class="field"><label>Crisis</label><span>${crises.map(esc).join(', ')}</span></div>` : ''}
           ${r.crisis_other_detail ? `<div class="field"><label>Crisis detail</label><span>${esc(r.crisis_other_detail)}</span></div>` : ''}
@@ -1335,7 +1357,7 @@ function renderDetail(r) {
           <div class="card-title">Referrer</div>
           <div class="field"><label>Name</label><span>${esc(ref.name || '—')}</span></div>
           ${ref.organisation ? `<div class="field"><label>Organisation</label><span>${esc(ref.organisation)}</span></div>` : ''}
-          ${ref.phone ? `<div class="field"><label>Phone</label><span>${fmtPhone(ref.phone)}</span></div>` : ''}
+          ${ref.phone ? `<div class="field"><label>Phone</label><span class="num">${fmtPhone(ref.phone)}</span></div>` : ''}
           ${ref.email ? `<div class="field"><label>Email</label><a href="mailto:${esc(ref.email)}">${esc(ref.email)}</a></div>` : ''}
           ${referrerNotes ? `<div class="field"><label>Referrer notes</label><span style="white-space:pre-wrap">${esc(referrerNotes)}</span></div>` : ''}
         </div>
@@ -1607,8 +1629,8 @@ function copyWishlistUrl(referralNumber) {
   navigator.clipboard.writeText(url).then(() => {
     const btn = document.getElementById('wishlist-link-btn');
     if (btn) {
-      btn.textContent = '✓ Copied!';
-      setTimeout(() => { btn.textContent = '📋 Copy wishlist link'; }, 2000);
+      btn.innerHTML = ICONS.check + '<span>Copied!</span>';
+      setTimeout(() => { btn.innerHTML = ICONS.copy + '<span>Copy wishlist link</span>'; }, 2000);
     }
   });
 }
